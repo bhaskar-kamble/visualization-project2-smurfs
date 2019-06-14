@@ -1,4 +1,4 @@
-path_to_file <- "/home/kbhaskar/beuth/Semester2/DataVisualization/Project2"
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs"
 source(paste0(path_to_file , "/" , "getGermanyData.R"))
 source(paste0(path_to_file , "/" , "cleanData.R"))
 
