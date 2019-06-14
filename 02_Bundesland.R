@@ -3,6 +3,8 @@ source(paste0(path_to_file , "/" , "getGermanyData.R"))
 source(paste0(path_to_file , "/" , "cleanData.R"))
 source(paste0(path_to_file , "/" , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "/" , "getBundeslandfromLK.R"))
+source(paste0(path_to_file , "/", "getSpecificConsumptionByYear.R"))
+
 
 #Get the yearly development of specific consumption
 
@@ -38,9 +40,19 @@ DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
 
 #now subset bundesland and do the calculations for specific consumption
-# (1) MFH case
+# (1) MFH case #calculate the specific consumption and the slope
 states <- unique(DL_MFH$bundesland)
+bundland_SV <- list()
 for (s in states) {
-  #calculate the specific consumption and the slope
-  
+  bund_mfh_data <- DL_MFH[DL_MFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_mfh_data , sfh=NULL , gtype="MFH")
+  #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
+  bundland_SV[[s]] <- specific_con
 }
+
+#now plot
+require(ggplot2)
+b_index <- 10
+bund_data <- bundland_SV[[b_index]]
+ggplot() + geom_point(data=bund_data , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))+labs(title=names(bundland_SV)[b_index])
