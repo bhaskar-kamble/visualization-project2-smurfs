@@ -41,18 +41,117 @@ DL_SFH <- getBundeslandfromLK(DL_SFH)
 
 #now subset bundesland and do the calculations for specific consumption
 # (1) MFH case #calculate the specific consumption and the slope
-states <- unique(DL_MFH$bundesland)
-bundland_SV <- list()
+states <- sort(unique(DL_MFH$bundesland))
+bundlands_SV_mfh <- list()
+bundlands_SV_sfh <- list()
+bundlands_SV_all <- list()
 for (s in states) {
-  bund_mfh_data <- DL_MFH[DL_MFH$bundesland == s  ,  ]
-  specific_con <- getSpecificConsumptionByYear(mfh=bund_mfh_data , sfh=NULL , gtype="MFH")
+  #For MFH:
+  bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
   #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
-  bundland_SV[[s]] <- specific_con
+  bundlands_SV_mfh[[s]] <- specific_con
+  #For SFH:
+  bund_data_sfh <- DL_SFH[DL_SFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=NULL , sfh=bund_data_sfh , gtype="SFH")
+  bundlands_SV_sfh[[s]] <- specific_con
+  #For both:
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=bund_data_sfh , gtype="ALL")
+  bundlands_SV_all[[s]] <- specific_con
 }
 
-#now plot
+#----------------------PLOT THE SPEZ VER VS YEAR FOR EACH BUNDESLAND---------------------
 require(ggplot2)
-b_index <- 10
-bund_data <- bundland_SV[[b_index]]
-ggplot() + geom_point(data=bund_data , aes(x=abrechnungsjahr,y=spz_verbrauch)
-)+scale_y_continuous(limits=c(0,150))+labs(title=names(bundland_SV)[b_index])
+#Choose bundesland. 
+#b_index: index for the bundeslands; lies between 1 and 16
+b_index <- 1
+s <- states[b_index]
+#-----------------MFH------------------
+#extract the specific bundesland for mfh
+bundland_SV_mfh <- bundlands_SV_mfh[[s]] 
+#Plot for MFH
+ggplot() + geom_point(data=bundland_SV_mfh , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))+labs(title=paste0(names(bundlands_SV_mfh)[b_index],", MFH"))
+#----------------SFH------------------
+#extract the specific bundesland for sfh
+bundland_SV_sfh <- bundlands_SV_sfh[[s]]
+#Plot for SFH
+ggplot() + geom_point(data=bundland_SV_sfh , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))+labs(title=paste0(names(bundlands_SV_mfh)[b_index],", 1-2 FH"))
+#----------------ALL------------------
+#extract the specific bundesland for ALL
+bundland_SV_all <- bundlands_SV_all[[s]]
+#Plot for ALL
+ggplot() + geom_point(data=bundland_SV_all , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))+labs(title=paste0(names(bundlands_SV_mfh)[b_index],", MFH + 1-2FH"))
+#----------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+#-----------------------Data frame of bundeslands and the slopes------------------------
+slopes_data <- data.frame(bundesland=states)
+slope_values_mfh <- NULL
+slope_values_sfh <- NULL
+slope_values_all <- NULL
+for (s in states) {
+  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
+  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
+  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
+  
+  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
+  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
+  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
+}
+slopes_data$MFH <- slope_values_mfh 
+slopes_data$SFH <- slope_values_sfh
+slopes_data$ALL <- slope_values_all
+#-----------------------------------------------------------------------------------------
+
+
+
+#-----------------------Show the slopes in a map------------------------------------------
+library(sf)
+library(dplyr)
+library(ggplot2)
+DL_map <- st_read("D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
+                 stringsAsFactors = FALSE)
+#now use inner_join to merge with slope values
+DL_map_SV <- merge(slopes_data , DL_map , by.x="bundesland" , by.y="NAME_1")
+
+ggplot(DL_map_SV) + geom_sf(aes(fill=MFH
+)) + scale_fill_gradient(low="green" , high = "red", name = "Slope (MFH)"
+) + theme(axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank())+coord_sf(datum=NA)+labs(title=
+          " ")+ theme(plot.title=element_text(size=22) , legend.text = element_text(size=15))
+
+
+
+
+
+
+#-----------make interactive map-------------------------------
+library(ggiraph) #too heavy - better use tmap (see below)
+gg <- ggplot(DL_map_SV)+geom_sf_interactive(
+  aes(fill=MFH,tooltip=sprintf("%s<br/>%s",bundesland,MFH),data_id=bundesland))+scale_fill_gradient(low="green" , high = "red")
+#DL_map_SV$bundesland <- gsub("ü" , "ue",DL_map_SV$bundesland)
+ggiraph(ggobj = gg)
+
+library(tmap)
+library(tmaptools)
+DL_map$MFH <- slopes_data$MFH
+tm_shape(DL_map) + tm_polygons("MFH",
+                               id="NAME_1",
+                               popup.vars=c("MFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
