@@ -127,6 +127,7 @@ http://personal.tcu.edu/kylewalker/articles/walker-2016-spatial-demography.html
 https://moderndata.plot.ly/using-the-pipe-operator-in-r-with-plotly/
 https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html
 https://plot.ly/r/dropdowns/
+https://plotly-r.com/introduction.html 
 
 
 
