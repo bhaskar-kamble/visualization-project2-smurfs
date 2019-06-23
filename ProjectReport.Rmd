@@ -1,0 +1,481 @@
+---
+title: "Project Report"
+author: "Bhaskar Kamble"
+date: "23 Juni 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+```
+
+# 1. Abstract
+
+The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of co2online.de, which has information on more than two million households in this time frame. (Trends in heating energy consumption).
+
+Has political significance - Klimaschutz, CO2 footprint, etc.
+
+
+# 2. Description of the data
+
+The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v2.Rdata` and `SFH20022018_v2.Rdata`.
+
+The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
+
+# 3. Getting and cleaning the data
+
+```{r}
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs"
+source(paste0(path_to_file , "/" , "getGermanyData.R"))
+source(paste0(path_to_file , "/" , "cleanData.R"))
+source(paste0(path_to_file , "/" , "getBundeslandfromCode.R"))
+source(paste0(path_to_file , "/" , "getBundeslandfromLK.R"))
+source(paste0(path_to_file , "/", "getSpecificConsumptionByYear.R"))
+
+#get data from the Rdata files, impose consistency in data types etc.
+DL_MFH <- getGermanyData(gtype = "MFH")
+DL_SFH <- getGermanyData(gtype = "SFH")
+
+#remove outliers:
+DL_MFH <- cleanData(DL_MFH , "MFH")
+DL_SFH <- cleanData(DL_SFH , "SFH")
+
+#find bundesland
+DL_MFH <- getBundeslandfromCode(DL_MFH)
+DL_SFH <- getBundeslandfromCode(DL_SFH)
+DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
+DL_SFH <- getBundeslandfromLK(DL_SFH)
+```
+
+# 4. Energy consumption trends across Germany
+
+```{r}
+MFH_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "MFH")
+SFH_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "SFH")
+ALL_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "ALL")
+```
+
+```{r}
+require(ggplot2)
+g_mfh <- ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))
+
+g_sfh <- ggplot() + geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))
+
+g_all <- ggplot() + geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+)+scale_y_continuous(limits=c(0,150))
+```
+
+```{r}
+g_mfh+labs(title="MFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+```
+
+```{r}
+g_sfh+labs(title="1-2FH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+```
+
+```{r}
+g_all+labs(title="MFH+SFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+```
+
+
+
+
+Mention about the winter of 2010. Maybe also the 2013(?) when it was warm.
+
+# 5. Energy consumption trends across the 16 Federal states (Bundesländer)
+
+```{r}
+#now subset bundesland and do the calculations for specific consumption
+# (1) MFH case #calculate the specific consumption and the slope
+states <- sort(unique(DL_MFH$bundesland))
+bundlands_SV_mfh <- list()
+bundlands_SV_sfh <- list()
+bundlands_SV_all <- list()
+for (s in states) {
+  #For MFH:
+  bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
+  #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
+  bundlands_SV_mfh[[s]] <- specific_con
+  #For SFH:
+  bund_data_sfh <- DL_SFH[DL_SFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=NULL , sfh=bund_data_sfh , gtype="SFH")
+  bundlands_SV_sfh[[s]] <- specific_con
+  #For both:
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=bund_data_sfh , gtype="ALL")
+  bundlands_SV_all[[s]] <- specific_con
+}
+
+#collect into single data frame - these will be used for plotting in plotly
+bundSV_mfh_df <- data.frame(abrechnungsjahr=2002:2018)
+bundSV_sfh_df <- data.frame(abrechnungsjahr=2002:2018)
+bundSV_all_df <- data.frame(abrechnungsjahr=2002:2018)
+for (s in names(bundlands_SV_mfh)) {
+  bundSV_mfh_df[[s]] <- bundlands_SV_mfh[[s]]$spz_verbrauch
+  bundSV_sfh_df[[s]] <- bundlands_SV_sfh[[s]]$spz_verbrauch
+  bundSV_all_df[[s]] <- bundlands_SV_all[[s]]$spz_verbrauch
+}
+```
+
+
+
+https://bookdown.org/paulcbauer/idv2/2-contact-material-dates.html 
+https://moderndata.plot.ly/new-feature-dropdown-menus-in-plotly-and-r/ 
+http://personal.tcu.edu/kylewalker/articles/walker-2016-spatial-demography.html
+https://moderndata.plot.ly/using-the-pipe-operator-in-r-with-plotly/
+https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html
+https://plot.ly/r/dropdowns/
+
+
+
+
+## 5a. Specific Energy Consumption for MFH for the federal states
+
+```{r}
+library(plotly)
+p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+
+p <- p %>% layout(showlegend=FALSE,
+  title = "Multifamily Houses",
+  xaxis = list(title = "Year"),
+  yaxis = list(title = "kWh/m2"),
+  updatemenus = list(
+    list(
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[1]),
+        list(method = "restyle",
+             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[2]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[3]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[4]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[5]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
+             label = states[6]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
+             label = states[7]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
+             label = states[8]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
+             label = states[9]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
+             label = states[10]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
+             label = states[11]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
+             label = states[12]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
+             label = states[13]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
+             label = states[14]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
+             label = states[15]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
+             label = states[16])
+      )
+    )
+  )
+)
+
+p
+```
+
+
+## 5b. Specific Energy Consumption for 1-2 Family Houses for the federal states
+
+```{r}
+p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+
+p <- p %>% layout(showlegend=FALSE,
+  title = "1-2 Family Houses",
+  xaxis = list(title = "Year"),
+  yaxis = list(title = "kWh/m2"),
+  updatemenus = list(
+    list(
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[1]),
+        list(method = "restyle",
+             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[2]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[3]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[4]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[5]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
+             label = states[6]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
+             label = states[7]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
+             label = states[8]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
+             label = states[9]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
+             label = states[10]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
+             label = states[11]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
+             label = states[12]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
+             label = states[13]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
+             label = states[14]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
+             label = states[15]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
+             label = states[16])
+      )
+    )
+  )
+)
+
+p
+```
+
+
+# 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
+
+
+
+```{r}
+p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+
+p <- p %>% layout(showlegend=FALSE,
+  title = "Multi and 1-2 Family Houses",
+  xaxis = list(title = "Year"),
+  yaxis = list(title = "kWh/m2"),
+  updatemenus = list(
+    list(
+      buttons = list(
+        list(method = "restyle",
+             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[1]),
+        list(method = "restyle",
+             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[2]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[3]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[4]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
+             label = states[5]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
+             label = states[6]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
+             label = states[7]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
+             label = states[8]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
+             label = states[9]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
+             label = states[10]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
+             label = states[11]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
+             label = states[12]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
+             label = states[13]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
+             label = states[14]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
+             label = states[15]),
+        list(method = "restyle",
+             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
+             label = states[16])
+      )
+    )
+  )
+)
+
+p
+```
+
+
+## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
+
+```{r}
+slopes_data <- data.frame(bundesland=states)
+slope_values_mfh <- NULL
+slope_values_sfh <- NULL
+slope_values_all <- NULL
+for (s in states) {
+  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
+  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
+  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
+  
+  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
+  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
+  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
+}
+slopes_data$MFH <- slope_values_mfh 
+slopes_data$SFH <- slope_values_sfh
+slopes_data$ALL <- slope_values_all
+
+library(sf)
+library(dplyr)
+library(ggplot2)
+DL_map <- st_read("D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
+                 stringsAsFactors = FALSE)
+```
+
+```{r}
+library(tmap)
+library(tmaptools)
+DL_map$MFH <- slopes_data$MFH #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("MFH",
+                               id="NAME_1",
+                               popup.vars=c("MFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+## 5e. Interactive maps for federal states for 1-2 family houses
+
+```{r}
+DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("SFH",
+                               id="NAME_1",
+                               popup.vars=c("SFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
+
+```{r}
+DL_map$ALL <- slopes_data$ALL #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("ALL",
+                               id="NAME_1",
+                               popup.vars=c("ALL"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+# Things to be done
+
+* Adjust the y axis range in Sections 5a, 5b abd 5c.
+* Add bounding box in Sections 5a, 5b abd 5c.
+* Add breaks to x-axis in Sections 5a, 5b abd 5c.
+* Add linear trend and formula of linear trend in in Sections 5a, 5b abd 5c.
+* Add confidence interval of slope in Sections 5d, 5e abd 5f.
+
+# Things that could be done
+
+* Use bookdown.
+* Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
+* Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Bundesland - check if plotly for ggplot is possible.
+* Breakdown of relative energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
+* Breakdown of relative energy consumption by energietraeger (making a cumulative graph by energietrager) for Bundesland - check if plotly for ggplot is possible.
+* Bezirk analysis of Berlin - percentage of Fernwärme in each Bezirk (for example).
