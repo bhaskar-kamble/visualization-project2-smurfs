@@ -18,7 +18,7 @@ Has political significance - Klimaschutz, CO2 footprint, etc.
 
 # 2. Description of the data
 
-The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v2.Rdata` and `SFH20022018_v2.Rdata`.
+The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v3.Rdata` and `SFH20022018_v3.Rdata`.
 
 The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
 
@@ -122,11 +122,17 @@ for (s in names(bundlands_SV_mfh)) {
 
 
 https://bookdown.org/paulcbauer/idv2/2-contact-material-dates.html 
+
 https://moderndata.plot.ly/new-feature-dropdown-menus-in-plotly-and-r/ 
+
 http://personal.tcu.edu/kylewalker/articles/walker-2016-spatial-demography.html
+
 https://moderndata.plot.ly/using-the-pipe-operator-in-r-with-plotly/
+
 https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html
+
 https://plot.ly/r/dropdowns/
+
 https://plotly-r.com/introduction.html 
 
 

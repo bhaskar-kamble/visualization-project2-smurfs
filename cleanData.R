@@ -8,11 +8,12 @@ cleanData <- function(obj,gtype) {
   
   check_cols <- c("verbrauch_gesamt_kwh",
                   "gebaeude_nutzflaeche",
-                  "gebaeude_baujahr")
-  MFH_low  <- c(  5000 ,  200 , 1100)
-  MFH_high <- c(700000 , 2400 , 2018)
-  SFH_low  <- c(  1000 ,   60 , 1100)
-  SFH_high <- c( 70000 , 2000 , 2018)
+                  "gebaeude_baujahr",
+                  "abrechnungsjahr")
+  MFH_low  <- c(  5000 ,  200 , 1100 , 2001)
+  MFH_high <- c(700000 , 2400 , 2018 , 2019)
+  SFH_low  <- c(  1000 ,   60 , 1100 , 2001)
+  SFH_high <- c( 70000 , 2000 , 2018 , 2019)
   
   if (gtype=="MFH") {
     limits_low <- MFH_low
