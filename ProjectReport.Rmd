@@ -652,17 +652,17 @@ bundlands_energietraeger <- relative_freq_interactive(DL_MFH)
 p <- plot_ly(type = 'bar')
 v = TRUE
 for (i in 1:length(states)) {
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = paste('Erdgas (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
                        x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = paste('Fluessiggas (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
                        x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = paste('Heizoel (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
                        x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = paste('Holzpellets (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
                        x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = paste('Strom (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
                        x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = paste('Waerme (', states[[i]], ')'),  
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
                        x = 2002:2018, visible = v)
 
   v = FALSE
@@ -697,6 +697,17 @@ p <- p %>% layout(
   )
 )
 p
+install.packages("rdwd")
+library(rdwd)
+link <- selectDWD("Saarland", res="daily", var="kl", per="recent")
+file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
+selectDWD("Potsdam", res="annual", var="kl", per="rh")
+clim <- readDWD(file, varnames=TRUE)
+
+data(metaIndex)
+str(metaIndex, vec.len=2)
+metaIndex$Bundesland
+metaIndex[metaIndex$Bundesland == "Baden-Wuerttemberg" & metaIndex$per == "historical",]
 ```
 
 # Things to be done
