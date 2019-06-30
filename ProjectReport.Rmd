@@ -19,7 +19,7 @@ Has political significance - Klimaschutz, CO2 footprint, etc.
 
 # 2. Description of the data
 
-The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v2.Rdata` and `SFH20022018_v2.Rdata`.
+The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v3.Rdata` and `SFH20022018_v3.Rdata`.
 
 The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
 
@@ -130,11 +130,17 @@ print(bundSV_mfh_df)
 
 
 https://bookdown.org/paulcbauer/idv2/2-contact-material-dates.html 
+
 https://moderndata.plot.ly/new-feature-dropdown-menus-in-plotly-and-r/ 
+
 http://personal.tcu.edu/kylewalker/articles/walker-2016-spatial-demography.html
+
 https://moderndata.plot.ly/using-the-pipe-operator-in-r-with-plotly/
+
 https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html
+
 https://plot.ly/r/dropdowns/
+
 https://plotly-r.com/introduction.html 
 
 
@@ -164,8 +170,8 @@ p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
 
 p <- p %>% layout(showlegend=FALSE,
   title = "Multifamily Houses",
-  xaxis = list(title = "Year"),
-  yaxis = list(title = "kWh/m2"),
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,150),tickvals=list(0,20,40,60,80,100,120,140)),
   updatemenus = list(
     list(
       buttons = list(
@@ -249,8 +255,8 @@ p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
 
 p <- p %>% layout(showlegend=FALSE,
   title = "1-2 Family Houses",
-  xaxis = list(title = "Year"),
-  yaxis = list(title = "kWh/m2"),
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,180),tickvals=list(0,20,40,60,80,100,120,140,160,180)),
   updatemenus = list(
     list(
       buttons = list(
@@ -333,11 +339,12 @@ p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
+#https://stackoverflow.com/questions/34093169/horizontal-vertical-line-in-plotly
 p <- p %>% layout(showlegend=FALSE,
   title = "Multi and 1-2 Family Houses",
-  xaxis = list(title = "Year"),
-  yaxis = list(title = "kWh/m2"),
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,160),tickvals=list(0,20,40,60,80,100,120,140,160)),
+  shapes=list(type='line', x0= 2001, x1= 2001, y0=0, y1=160, line=list(width=1)),
   updatemenus = list(
     list(
       buttons = list(
