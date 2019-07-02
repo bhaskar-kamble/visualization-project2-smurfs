@@ -58,18 +58,16 @@ relative_freq_interactive <- function(data) {
 
 get_visibility_combinations <- function() {
   visibility_combinations <- list()
-  i = 2
-  visibility_index = 1
+  i = 1
   for (state in states) {
     to = 16*6 + 1
     vis <- rep(F, to)
     for(k in ((i - 1) * 6 + 2): (i * 6 + 1))
       vis[k] <- TRUE
-    visibility_combinations[[visibility_index]] <- list(method = "restyle",
+    visibility_combinations[[i]] <- list(method = "restyle",
                                                         args = list("visible", as.list(vis)),
                                                         label = state)
     i = i + 1
-    visibility_index = visibility_index + 1
   }
   return(visibility_combinations)
 }

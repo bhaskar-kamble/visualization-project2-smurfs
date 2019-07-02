@@ -525,97 +525,128 @@ grid.arrange(i1,i2,ncol=3)
 ```
 
 ```{r}
-library(plotly)
 
-library(tidyr)
-absolute_freq_interactive <- function(data) {
-  data_aggregated <- prepare_data(data)
-  data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, bundesland, fill = list(value = 0)))
-  data_aggregated[is.na(data_aggregated)] <- 0
-  data_wide <- spread(data_aggregated, energietraeger, value)
-  data_wide
+get_absolute_frequencies_interactive <- function(data, title) {
+  bundlands_energietraeger <- absolute_freq_interactive(data)
   
-  return(as.data.frame(data_wide))
-}
+  p <- plot_ly(type = 'bar', colors = "Blues") 
+  
+  v = TRUE
+  for (i in 1:length(states)) {
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
+                         x = 2002:2018, visible = v, colors = "Blues") 
+  
+    v = FALSE
+  }
+  
+  p <- p %>% layout(
+      xaxis = list(range = c(2002, 2018)),
+      barmode='stack',
+      colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
 
-bundlands_energietraeger <- absolute_freq_interactive(DL_MFH)
-
-
-p <- plot_ly(type = 'bar') 
-
-v = TRUE
-for (i in 1:length(states)) {
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
-                       x = 2002:2018, visible = v)
-
-  v = FALSE
-}
-
-p <- p %>% layout(
-    xaxis = list(range = c(2002, 2018)),
-    barmode='stack')
-
-p <- p %>% layout(
-  title = "Energie Traeger",
-  xaxis = list(title = "Year", range = c(2002, 2018)),
-  yaxis = list(title = "Value"),
-  updatemenus = list(
-    list(
-      buttons = get_visibility_combinations()
+  p <- p %>% layout(
+    title = title,
+    xaxis = list(title = "Year", range = c(2002, 2018)),
+    yaxis = list(title = "Value"),
+    updatemenus = list(
+      list(
+        buttons = get_visibility_combinations()
+      )
     )
   )
-)
-p
+return(p)
+}
 ```
 ```{r}
 library(plotly)
 library(tidyr)
-bundlands_energietraeger <- relative_freq_interactive(DL_MFH)
-
-p <- plot_ly(type = 'bar')
-v = TRUE
-for (i in 1:length(states)) {
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
-                       x = 2002:2018, visible = v)
-  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
-                       x = 2002:2018, visible = v)
-
-  v = FALSE
-}
-
-
-p <- p %>% layout(
-  title = "Energie Traeger",
-  xaxis = list(title = "Year", range = c(2002, 2018)),
-  yaxis = list(title = "Value"),
-  barmode ='stack',
-  updatemenus = list(
-    list(
-      buttons = get_visibility_combinations()
+get_relative_frequencies_interactive <- function(data, title) {
+  bundlands_energietraeger <- relative_freq_interactive(data)
+  
+  p <- plot_ly(type = 'bar')
+  v = TRUE
+  for (i in 1:length(states)) {
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
+                         x = 2002:2018, visible = v)
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
+                         x = 2002:2018, visible = v)
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
+                         x = 2002:2018, visible = v)
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
+                         x = 2002:2018, visible = v)
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
+                         x = 2002:2018, visible = v)
+    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
+                         x = 2002:2018, visible = v)
+  
+    v = FALSE
+  }
+  
+  
+  p <- p %>% layout(
+      xaxis = list(range = c(2002, 2018)),
+      barmode='stack',
+      colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
+  
+  p <- p %>% layout(
+    title = title,
+    xaxis = list(title = "Year", range = c(2002, 2018)),
+    yaxis = list(title = "Value"),
+    barmode ='stack',
+    updatemenus = list(
+      list(
+        buttons = get_visibility_combinations()
+      )
     )
   )
-)
-p
+  return(p)
+}
+```
+```{r}
+library(plotly)
+library(tidyr)
+
+get_absolute_frequencies_interactive(DL_MFH, 'Energie Traeger MFH - absolute freq')
+```
+```{r}
+get_relative_frequencies_interactive(DL_MFH, 'Energie Traeger MFH -  relative freq')
+```
+```{r}
+library(plotly)
+library(tidyr)
+
+get_absolute_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - absolute freq')
+```
+```{r}
+library(plotly)
+library(tidyr)
+
+get_relative_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - relative freq')
 ```
 
+```{r}
+library(plotly)
+library(tidyr)
+
+get_absolute_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - absolute freq')
+```
+
+```{r}
+library(plotly)
+library(tidyr)
+
+get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - relative freq')
+```
 # Things to be done
 
 * Adjust the y axis range in Sections 5a, 5b abd 5c.
