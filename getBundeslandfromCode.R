@@ -1,6 +1,6 @@
 getBundeslandfromCode <- function(obj) { #obj is either DL_MFH, or DL_SFH, or a subset or a union of these, which in turn are created by getGermanyData.R
   #assigns bundesland to those cases where only the digit(s) for the bundesland is given.
-  obj$bundesland[obj$bundesland=="1"]  <- "Baden-Württemberg"
+  obj$bundesland[obj$bundesland=="1"]  <- "Baden-Wuerttemberg"
   obj$bundesland[obj$bundesland=="2"]  <- "Bayern"
   obj$bundesland[obj$bundesland=="3"]  <- "Berlin"
   obj$bundesland[obj$bundesland=="4"]  <- "Brandenburg"
@@ -15,6 +15,9 @@ getBundeslandfromCode <- function(obj) { #obj is either DL_MFH, or DL_SFH, or a 
   obj$bundesland[obj$bundesland=="13"]  <- "Sachsen"
   obj$bundesland[obj$bundesland=="14"]  <- "Sachsen-Anhalt"
   obj$bundesland[obj$bundesland=="15"]  <- "Schleswig-Holstein"
-  obj$bundesland[obj$bundesland=="16"]  <- "Thüringen"
+  obj$bundesland[obj$bundesland=="16"]  <- "Thueringen"
+  obj$bundesland[obj$bundesland=="Baden-W\xfcrttemberg"]  <- "Baden-Wuerttemberg"
+  obj$bundesland[obj$bundesland=="Th\xfcringen"]  <- "Thueringen"
+  
   return(obj)
 }

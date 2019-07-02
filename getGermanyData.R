@@ -1,6 +1,6 @@
 getGermanyData <- function(gtype) { #gtype can be either SFH or MFH
   
-  path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs"
+  path_to_file <- "~/Desktop/visualization-project2-smurfs"
   
   if (gtype == "SFH") {
     load( paste0(path_to_file , "/", "SFH20022018_v3.RData"))
@@ -20,7 +20,7 @@ getGermanyData <- function(gtype) { #gtype can be either SFH or MFH
     SFH20022018$sto_plz <- as.integer(SFH20022018$sto_plz)
     return_data <- SFH20022018
   }
-  
+
   if (gtype == "MFH") {
     load( paste0(path_to_file , "/", "MFH20022018_v3.RData"))
     MFH20022018$gtype <- "MFH"
