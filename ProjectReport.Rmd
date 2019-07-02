@@ -2,7 +2,12 @@
 title: "Project Report"
 author: "Bhaskar Kamble"
 date: "23 Juni 2019"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    theme: united
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -32,6 +37,7 @@ source(paste0(path_to_file , "/" , "cleanData.R"))
 source(paste0(path_to_file , "/" , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "/" , "getBundeslandfromLK.R"))
 source(paste0(path_to_file , "/", "getSpecificConsumptionByYear.R"))
+source(paste0(path_to_file , "/", "getConsumptionPerEnergieTraeger.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -103,7 +109,6 @@ for (s in states) {
   print(s)
   bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
   specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
-  print(specific_con)
   #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
   bundlands_SV_mfh[[s]] <- specific_con
   #For SFH:
@@ -124,7 +129,6 @@ for (s in names(bundlands_SV_mfh)) {
   bundSV_sfh_df[[s]] <- bundlands_SV_sfh[[s]]$spz_verbrauch
   bundSV_all_df[[s]] <- bundlands_SV_all[[s]]$spz_verbrauch
 }
-print(bundSV_mfh_df)
 ```
 
 
@@ -428,7 +432,7 @@ slopes_data$ALL <- slope_values_all
 library(sf)
 library(dplyr)
 library(ggplot2)
-DL_map <- st_read("D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
+DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
                  stringsAsFactors = FALSE)
 ```
 
@@ -480,26 +484,15 @@ tm_shape(DL_map) + tm_polygons("ALL",
 ```
 
 
-
 ## 5??. Consumption per year
 
 ```{r}
-require(grid)
-require(gridExtra)
-
-absolute_freq <- function(data) {
-  T <- aggregate(data, by=list(data$abrechnungsjahr, data$energietraeger), FUN=length)
-  data_aggregated = T[c('Group.1', 'Group.2', 'sto_plz')]
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger', 'value')
-  return(data_aggregated)
-}
-
 i1 <- ggplot(data=absolute_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + ggtitle('MFH') +  theme_bw() +
+  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - absolute freq') +  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),legend.position="none")
 
-i2 <-  ggplot(data=absolute_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + ggtitle('SFH') +  theme_bw() +
+i2 <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
 
 grid.arrange(i1,i2,ncol=3)
@@ -507,29 +500,26 @@ grid.arrange(i1,i2,ncol=3)
 ## 5f. Consumption per year - relative frequencies
 
 ```{r}
-#require(grid)
-#require(gridExtra)
-
-relative_freq <- function(data) {
-  T <- aggregate(data, by=list(data$abrechnungsjahr, data$energietraeger), FUN=length)
-  by_year <- aggregate(data, by=list(data$abrechnungsjahr), FUN=length)
-  by_year <- by_year[]
-  data_aggregated = T[c('Group.1', 'Group.2', 'sto_plz')]
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger', 'value')
-  for (year in c(2002:2018)) {
-    data_aggregated[data_aggregated$abrechnungsjahr == year, ]$value <- 
-      data_aggregated[data_aggregated$abrechnungsjahr == year, ]$value / by_year[by_year$Group.1 == year, ]$sto_plz
-  }
-  return(data_aggregated)
-}
-
-i1 <- ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + ggtitle('MFH') +  theme_bw() +
+i1 <- ggplot(data = absolute_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - absolute freq') +
   theme(plot.title = element_text(hjust = 0.5),legend.position="none")
 
 i2 <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + ggtitle('SFH') +  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
+  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
+  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
+
+grid.arrange(i1,i2,ncol=3)
+```
+
+```{r}
+
+i1 <- ggplot(data = absolute_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - absolute freq') +
+  theme(plot.title = element_text(hjust = 0.5),legend.position="none")
+
+i2 <-  ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
+  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
 
 grid.arrange(i1,i2,ncol=3)
 ```
@@ -539,10 +529,7 @@ library(plotly)
 
 library(tidyr)
 absolute_freq_interactive <- function(data) {
-  T <- aggregate(data, by=list(data$abrechnungsjahr, data$energietraeger, data$bundesland), FUN=length)
-  data_aggregated = T[c('Group.1', 'Group.2', 'Group.3' ,'sto_plz')]
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger',  'bundesland', 'value')
-
+  data_aggregated <- prepare_data(data)
   data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, bundesland, fill = list(value = 0)))
   data_aggregated[is.na(data_aggregated)] <- 0
   data_wide <- spread(data_aggregated, energietraeger, value)
@@ -552,108 +539,47 @@ absolute_freq_interactive <- function(data) {
 }
 
 bundlands_energietraeger <- absolute_freq_interactive(DL_MFH)
-bundlands_energietraeger
 
-
-bundlands_energietraeger[bundlands_energietraeger$bundesland == states[3],]$fluessiggas
-bundlands_energietraeger[is.na(bundlands_energietraeger)] <- 0
-
-
-p <- plot_ly(bundlands_energietraeger , type = 'bar') 
-v = T
-ss = 1
-  for (state in states) {
-    assign(paste0('data',ss), bundlands_energietraeger[bundlands_energietraeger$bundesland == state,])
-    ss = ss + 1
-  }
 
 p <- plot_ly(type = 'bar') 
 
-  for (state in states) {
-    print(bundlands_energietraeger[bundlands_energietraeger$bundesland == state,]$erdgas)
-    a <- which(bundlands_energietraeger$bundesland == state)
-       p <- p %>% add_trace(y = ~erdgas[a], name = 'Erdgas',  
-                            x = 2002:2018, visible = v)
-      p <- p %>% add_trace(y = ~fluessiggas[a], name = 'Fluessiggas',  
-                           x = 2002:2018, visible = v)
-       p <- p %>% add_trace(y = ~heizoel[a], name = 'Heizoel',  
-                            x = 2002:2018, visible = v)
-      p <- p %>% add_trace(y = ~holzpellets[a], name = 'Holzpellets',  
-                           x = 2002:2018, visible = v)
-       p <- p %>% add_trace(y = ~strom[a], name = 'Strom',  
-                            x = 2002:2018, 
-                            visible = v)
-      p <- p %>% add_trace(y = ~waerme[a], name = 'Waerme',  
-                           x = 2002:2018, visible = v)
+v = TRUE
+for (i in 1:length(states)) {
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
+                       x = 2002:2018, visible = v)
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
+                       x = 2002:2018, visible = v)
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
+                       x = 2002:2018, visible = v)
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
+                       x = 2002:2018, visible = v)
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
+                       x = 2002:2018, visible = v)
+  p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
+                       x = 2002:2018, visible = v)
 
-    v = F
-  }
-#  add_trace(y = ~bundlands_energietraeger[bundlands_energietraeger$bundesland == states[3],]$erdgas, name = "Erdgass", x = 2002:2018,
-#           y = c(0,max(bundlands_energietraeger[bundlands_energietraeger$bundesland == states[2],]$fluessiggas))) %>%
- 
+  v = FALSE
+}
+
 p <- p %>% layout(
     xaxis = list(range = c(2002, 2018)),
-#    yaxis = list(range = c(0, 2500)),
     barmode='stack')
 
-bundlands_energietraeger[bundlands_energietraeger$bundesland == states[2],]
-ll <- list()
-hh <- list()
-i = 2
-s = 1
-for (state in states) {
-  to = 16*6 + 1
-  vis <- rep(F, to)
-  for(k in ((i - 1) * 6 + 2): (i * 6 + 1))
-    vis[k] <- TRUE
-  ll[[s]] <- list(method = "restyle",
-              args = list("visible", as.list(vis)),
-              label = state)
-  i = i + 1
-  s = s + 1
-}
-ll
-vis
-as.list(vis)
 p <- p %>% layout(
   title = "Energie Traeger",
   xaxis = list(title = "Year", range = c(2002, 2018)),
   yaxis = list(title = "Value"),
   updatemenus = list(
     list(
-      buttons = ll
+      buttons = get_visibility_combinations()
     )
   )
 )
 p
-p$x
 ```
 ```{r}
 library(plotly)
-
 library(tidyr)
-relative_freq_interactive <- function(data) {
-  T <- aggregate(data, by=list(data$abrechnungsjahr, data$energietraeger, data$bundesland), FUN=length)
-  data_aggregated = T[c('Group.1', 'Group.2', 'Group.3' ,'sto_plz')]
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger',  'bundesland', 'value')
-
-  by_year <- aggregate(data, by=list(data$abrechnungsjahr, data$bundesland), FUN=length)
-  
-  data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, bundesland, fill = list(value = 0)))
-  
-  for (year in c(2002:2018)) {
-    for (state in states) {
-    data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$bundesland == state, ]$value <- 
-      data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$bundesland == state, ]$value / by_year[by_year$Group.1 == year & by_year$Group.2 == state, ]$sto_plz
-    }
-  }
-  data_aggregated[is.na(data_aggregated)] <- 0
-  data_wide <- spread(data_aggregated, energietraeger, value)
-  data_wide
-  
-  return(as.data.frame(data_wide))
-}
-
 bundlands_energietraeger <- relative_freq_interactive(DL_MFH)
 
 p <- plot_ly(type = 'bar')
@@ -675,22 +601,6 @@ for (i in 1:length(states)) {
   v = FALSE
 }
 
-dropdown_items <- list()
-hh <- list()
-i = 1
-to = 16*6 + 1
-for (state in states) {
-  visible <- list()
-  for (k in 1:to)
-    visible[[k]] <- FALSE
-  for(k in ((i - 1) * 6 + 2): (i * 6 + 1))
-    visible[[k]] <- TRUE
-  
-  dropdown_items[[i]] <- list(method = "restyle",
-              args = list("visible", visible),
-              label = state)
-  i = i + 1
-}
 
 p <- p %>% layout(
   title = "Energie Traeger",
@@ -699,22 +609,11 @@ p <- p %>% layout(
   barmode ='stack',
   updatemenus = list(
     list(
-      buttons = dropdown_items
+      buttons = get_visibility_combinations()
     )
   )
 )
 p
-install.packages("rdwd")
-library(rdwd)
-link <- selectDWD("Saarland", res="daily", var="kl", per="recent")
-file <- dataDWD(link, read=FALSE, dir="DWDdata", quiet=TRUE, force=NA)
-selectDWD("Potsdam", res="annual", var="kl", per="rh")
-clim <- readDWD(file, varnames=TRUE)
-
-data(metaIndex)
-str(metaIndex, vec.len=2)
-metaIndex$Bundesland
-metaIndex[metaIndex$Bundesland == "Baden-Wuerttemberg" & metaIndex$per == "historical",]
 ```
 
 # Things to be done
