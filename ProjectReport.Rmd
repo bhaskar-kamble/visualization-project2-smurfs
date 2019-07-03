@@ -1,6 +1,6 @@
 ---
 title: "Project Report"
-author: "Bhaskar Kamble"
+author: "Ivana Trajanovska, Pallavi Mitra and Bhaskar Kamble"
 date: "23 Juni 2019"
 output: 
   html_document:
@@ -27,6 +27,8 @@ Has political significance - Klimaschutz, CO2 footprint, etc.
 The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v3.Rdata` and `SFH20022018_v3.Rdata`.
 
 The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
+
+Do str(data) in the next section.
 
 # 3. Getting and cleaning the data
 
@@ -67,36 +69,36 @@ ALL_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "A
 
 ```{r}
 require(ggplot2)
-g_mfh <- ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-)+scale_y_continuous(limits=c(0,150))
+#g_mfh <- ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+#)+scale_y_continuous(limits=c(0,150))
 
-g_sfh <- ggplot() + geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-)+scale_y_continuous(limits=c(0,150))
+#g_sfh <- ggplot() + geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+#)+scale_y_continuous(limits=c(0,150))
 
-g_all <- ggplot() + geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-)+scale_y_continuous(limits=c(0,150))
+#g_all <- ggplot() + geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
+#)+scale_y_continuous(limits=c(0,150))
 ```
 
 ```{r}
-g_mfh+labs(title="MFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+#g_mfh+labs(title="MFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
 ```
 
 ```{r}
-g_sfh+labs(title="1-2FH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+#g_sfh+labs(title="1-2FH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
 ```
 
 ```{r}
-g_all+labs(title="MFH+SFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+#g_all+labs(title="MFH+SFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
 ```
 
 
-### All graphs together now:
+
 
 ```{r}
-ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
-)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
-)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
-)+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
+#ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
+#)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
+#)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
+#)+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
 ```{r}
@@ -337,7 +339,7 @@ p
 ```
 
 
-# 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
+## 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
 
 
 
@@ -501,14 +503,14 @@ tm_shape(DL_map) + tm_polygons("ALL",
 ```
 
 
-## 5??. Energy consumption per year - we have to remove this (depends on sample size)
+## 5g Energy consumption per year MFH (absolute and relative) split by energy source
 
 ```{r}
 i1 <- ggplot(data=absolute_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
   geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - absolute freq') +  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),legend.position="none")
 
-i2 <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+i2 <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
   geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
 
@@ -519,7 +521,8 @@ grid.arrange(i1,i2,ncol=2)
 
 absolute_freq(DL_MFH)
 ```
-## 5f. Consumption per year - relative frequencies
+
+## 5h. Energy consumption per year SFH (absolute and relative) split by energy source
 
 ```{r}
 i1 <- ggplot(data = absolute_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
