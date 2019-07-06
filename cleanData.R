@@ -45,7 +45,10 @@ cleanData <- function(obj,gtype) {
     is_in_range <- (obj[[current_var]] > limits_low[i]) & (obj[[current_var]] < limits_high[i])
     obj <- obj[is_in_range , ]
   }
-
+  obj <- obj[complete.cases(obj) , ] #gebaeudebaujahr has a bunch of NAs, which changes everything to NAs when you compare the
+  #gebaeudebaujahr. check this out:
+  #testdat <- data.frame(x=sample(1:10),y=c(sample(1:9),NA) )
+  #testdat[testdat$y>4 , ] and see what it does to the NA row! it makes even the x as NA!
   return(obj)
   
 }
