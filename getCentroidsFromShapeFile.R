@@ -7,7 +7,8 @@ DL_map <- st_read(
 
 centroids <- do.call(rbind,st_centroid(DL_map$geometry))
 centroids <- as.data.frame(centroids)
-names(centroids) <- c("longitude" , "latitude")
+centroids$landkreis <- DL_map$NAME_2
+names(centroids) <- c("longitude" , "latitude","landkreis")
 #https://github.com/r-spatial/sf/issues/75 (for extracting centroids from a shapefile)
 
 #this plots the map with the centrids also:
