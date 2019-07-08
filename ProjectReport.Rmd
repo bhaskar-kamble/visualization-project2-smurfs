@@ -33,13 +33,14 @@ Do str(data) in the next section.
 # 3. Getting and cleaning the data
 
 ```{r}
-path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs"
-source(paste0(path_to_file , "/" , "getGermanyData.R"))
-source(paste0(path_to_file , "/" , "cleanData.R"))
-source(paste0(path_to_file , "/" , "getBundeslandfromCode.R"))
-source(paste0(path_to_file , "/" , "getBundeslandfromLK.R"))
-source(paste0(path_to_file , "/", "getSpecificConsumptionByYear.R"))
-source(paste0(path_to_file , "/", "getConsumptionPerEnergieTraeger.R"))
+path_to_file <- "visualization-project2-smurfs"
+source(paste0(path_to_file , "" , "getGermanyData.R"))
+source(paste0(path_to_file , "" , "cleanData.R"))
+source(paste0(path_to_file , "" , "getBundeslandfromCode.R"))
+source(paste0(path_to_file , "" , "getBundeslandfromLK.R"))
+source(paste0(path_to_file , "", "getSpecificConsumptionByYear.R"))
+source(paste0(path_to_file , "", "getConsumptionPerEnergieTraeger.R"))
+source(paste0(path_to_file , "", "getConsumptionPerEnergieTraeger.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -450,7 +451,7 @@ slopes_data$ALL <- slope_values_all
 library(sf)
 library(dplyr)
 library(ggplot2)
-DL_map <- st_read("D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE)
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE)
 #DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
 #                 stringsAsFactors = FALSE)
 ```
@@ -674,6 +675,61 @@ library(plotly)
 library(tidyr)
 
 get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - relative freq')
+```
+
+
+```{r}
+library(plotly)
+library(tidyr)
+plot_som(DL_MFH)
+```
+
+```{r}
+library(plotly)
+library(tidyr)
+plot_som(DL_SFH)
+```
+```{r}
+library(plotly)
+
+tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = sum)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+```{r}
+library(plotly)
+
+tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = sum)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for SFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+
+```{r}
+library(plotly)
+
+bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
+tmp <- aggregate(bind[c(-1, -2)], 
+                 by=list(bind$bundesland, bind$abrechnungsjahr), FUN = sum)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH & SFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
 ```
 # Things to be done
 
