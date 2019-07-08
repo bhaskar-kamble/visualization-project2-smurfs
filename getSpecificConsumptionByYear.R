@@ -28,3 +28,5 @@ getSpecificConsumptionByYear <- function(mfh,sfh,gtype) {#gtype: MFH, SFH, or AL
   }
   return(return_data)
 }
+
+qf(0.25,2,188)
