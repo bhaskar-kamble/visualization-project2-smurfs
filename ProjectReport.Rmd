@@ -535,7 +535,7 @@ i2 <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=
 
 grid.arrange(i1,i2,ncol=2)
 
-absolute_freq(DL_SFH)
+#absolute_freq(DL_SFH)
 ```
 
 ```{r}
@@ -549,7 +549,7 @@ i2 <-  ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr ,
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
 
 grid.arrange(i1,i2,ncol=2)
-absolute_freq(rbind(DL_SFH, DL_MFH))
+#absolute_freq(rbind(DL_SFH, DL_MFH))
 ```
 
 ```{r}
