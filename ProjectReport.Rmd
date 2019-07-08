@@ -274,6 +274,8 @@ p <- p %>% layout(showlegend=FALSE,
 
 p
 ```
+
+```{r}
 ## barplot of slope parameters for all 16 bundesland
 library(ggplot2)
 
@@ -291,7 +293,7 @@ mydata <-data.frame(slope, states)
 p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
 p +labs(title="MFH")
 
-
+```
 
 
 ## 5b. Specific Energy Consumption for 1-2 Family Houses for the federal states
@@ -395,7 +397,12 @@ p <- p %>% layout(showlegend=FALSE,
 
 p
 ```
+
 #barplot
+
+
+```{r}
+
 slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
 abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
 
@@ -409,7 +416,7 @@ mydata <-data.frame(slope, states)
 
 p <-ggplot(mydata, aes(states, slope))+ geom_bar(stat = "identity")+ coord_flip()
 p +labs(title="SFH")
-
+```
 ## 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
 
 
@@ -516,6 +523,8 @@ p
 ```
 # barplot
 
+```{r}
+
 slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
 abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
 
@@ -530,7 +539,7 @@ mydata <-data.frame(slope, states)
 p <-ggplot(mydata, aes(states, slope)) +geom_bar(stat = "identity")+ coord_flip()
 p +labs(title="MFH +SFH")
 
-
+```
 
 ## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
 
