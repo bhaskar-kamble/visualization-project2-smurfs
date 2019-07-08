@@ -40,7 +40,7 @@ source(paste0(path_to_file , "" , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "" , "getBundeslandfromLK.R"))
 source(paste0(path_to_file , "", "getSpecificConsumptionByYear.R"))
 source(paste0(path_to_file , "", "getConsumptionPerEnergieTraeger.R"))
-source(paste0(path_to_file , "", "getConsumptionPerEnergieTraeger.R"))
+source(paste0(path_to_file , "", "getCentroidsFromShapeFile.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
