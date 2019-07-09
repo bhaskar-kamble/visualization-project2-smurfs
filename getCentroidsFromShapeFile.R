@@ -27,7 +27,7 @@ require(RColorBrewer)
 plot_som <- function(data) {
   total <- merge(data,centroids,by=c("Landkreis_von_GS"))
   
-  expl_columns <- c('latitude', 'longitude', 'gebaeude_baujahr', 'gebaeude_nutzflaeche', 'verbrauch_gesamt_kwh_spez', 'abrechnungsjahr')
+  expl_columns <- c('latitude', 'longitude', 'gebaeude_baujahr', 'gebaeude_nutzflaeche', 'verbrauch_gesamt_kwh_spez')
   subs <- total[, c('Landkreis_von_GS', expl_columns)]
   subs <-aggregate(subs[c(-1)], by = list(subs$Landkreis_von_GS), FUN=mean)
   

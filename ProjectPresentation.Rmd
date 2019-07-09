@@ -5,8 +5,6 @@ date: "09 Juli 2019"
 always_allow_html: yes
 output:
   beamer_presentation:    
-    includes:
-      in_header: D:/GITHUB_REPOS/co2emissions/Berlin/BezirkAnalysis/header_pagenrs.tex
   ioslides_presentation: default
 ---
 
@@ -499,7 +497,7 @@ plot_som(DL_SFH)
 
 * Middle eastern districts also had larger consumption.
 
-* There were interesting discoveries that lately some districts far north have lower consumption
+* There were interesting discoveries that some districts far north have lower consumption
 
 * Also, districts that belonged to Baden-Württemberg had newer buildings and a very small consumption
 
