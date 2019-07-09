@@ -33,13 +33,14 @@ Do str(data) in the next section.
 # 3. Getting and cleaning the data
 
 ```{r}
-path_to_file <- ""
-source(paste0(path_to_file , "" , "getGermanyData.R"))
-source(paste0(path_to_file , "" , "cleanData.R"))
-source(paste0(path_to_file , "" , "getBundeslandfromCode.R"))
-source(paste0(path_to_file , "" , "getBundeslandfromLK.R"))
-source(paste0(path_to_file , "", "getSpecificConsumptionByYear.R"))
-source(paste0(path_to_file , "", "getConsumptionPerEnergieTraeger.R"))
+#path_to_file <- ""
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
+source(paste0(path_to_file , "getGermanyData.R"))
+source(paste0(path_to_file , "cleanData.R"))
+source(paste0(path_to_file , "getBundeslandfromCode.R"))
+source(paste0(path_to_file , "getBundeslandfromLK.R"))
+source(paste0(path_to_file , "getSpecificConsumptionByYear.R"))
+source(paste0(path_to_file , "getConsumptionPerEnergieTraeger.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -56,7 +57,7 @@ DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
 unique(DL_MFH$bundesland)
 
-source(paste0(path_to_file , "", "getCentroidsFromShapeFile.R"))
+source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
 ```
 
 # 4. Energy consumption trends across Germany

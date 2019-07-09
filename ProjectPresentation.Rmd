@@ -30,13 +30,16 @@ The topic is of high political significance in the context of international meas
 
 
 ```{r}
-path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs"
-source(paste0(path_to_file , "/" , "getGermanyData.R"))
-source(paste0(path_to_file , "/" , "cleanData.R"))
-source(paste0(path_to_file , "/" , "getBundeslandfromCode.R"))
-source(paste0(path_to_file , "/" , "getBundeslandfromLK.R"))
-source(paste0(path_to_file , "/", "getSpecificConsumptionByYear.R"))
-source(paste0(path_to_file , "/", "getConsumptionPerEnergieTraeger.R"))
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/" # do not delete; comment out if not required
+```
+
+```{r}
+source(paste0(path_to_file, "getGermanyData.R"))
+source(paste0(path_to_file, "cleanData.R"))
+source(paste0(path_to_file, "getBundeslandfromCode.R"))
+source(paste0(path_to_file, "getBundeslandfromLK.R"))
+source(paste0(path_to_file, "getSpecificConsumptionByYear.R"))
+source(paste0(path_to_file, "getConsumptionPerEnergieTraeger.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -240,513 +243,180 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 
 
 
-# Heat map of states and year
-
-
-
-
-
-
-```{r}
-library(plotly)
-p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
-p <- p %>% layout(showlegend=FALSE,
-  title = "Multifamily Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,150),tickvals=list(0,20,40,60,80,100,120,140)),
-  updatemenus = list(
-    list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
-    )
-  )
-)
-
-p
-```
-
-
-
-# Next
-
-```{r}
-p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
-p <- p %>% layout(showlegend=FALSE,
-  title = "1-2 Family Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,180),tickvals=list(0,20,40,60,80,100,120,140,160,180)),
-  updatemenus = list(
-    list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
-    )
-  )
-)
-
-p
-```
-
+# Heat map of states and years - Multifamily buildings
 
 
 
 
 ```{r}
-p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-#https://stackoverflow.com/questions/34093169/horizontal-vertical-line-in-plotly
-p <- p %>% layout(showlegend=FALSE,
-  title = "Multi and 1-2 Family Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,160),tickvals=list(0,20,40,60,80,100,120,140,160)),
-  shapes=list(type='line', x0= 2001, x1= 2001, y0=0, y1=160, line=list(width=1)),
-  updatemenus = list(
-    list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
-    )
-  )
-)
+require(reshape2)
+bundSV_mfh_long <- melt(bundSV_mfh_df, id.vars="abrechnungsjahr")
+bundSV_sfh_long <- melt(bundSV_sfh_df, id.vars="abrechnungsjahr")
+bundSV_all_long <- melt(bundSV_all_df, id.vars="abrechnungsjahr")
+names(bundSV_mfh_long) <- c("abrechnungsjahr","bundesland","spz_verbrauch")
+names(bundSV_sfh_long) <- c("abrechnungsjahr","bundesland","spz_verbrauch")
+names(bundSV_all_long) <- c("abrechnungsjahr","bundesland","spz_verbrauch")
+g1 <- ggplot(data = bundSV_mfh_long , aes(x=abrechnungsjahr , y=bundesland , fill = spz_verbrauch)) + geom_tile()+scale_fill_gradient(low="green",high="red",name=bquote(kWh/m^2),breaks=c(90,115,140))+labs(x="Year",y="")+theme(legend.position="bottom",legend.direction="horizontal")+scale_x_continuous(breaks=seq(2002,2018,2))
+g2 <- ggplot(data = bundSV_sfh_long , aes(x=abrechnungsjahr , y=bundesland , fill = spz_verbrauch)) + geom_tile()+scale_fill_gradient(low="green",high="red",name=bquote(kWh/m^2))+labs(x="Year",y="")+theme(legend.position="bottom",legend.direction="horizontal")+scale_x_continuous(breaks=seq(2002,2018,2))
+g3 <- ggplot(data = bundSV_all_long , aes(x=abrechnungsjahr , y=bundesland , fill = spz_verbrauch)) + geom_tile()+scale_fill_gradient(low="green",high="red",name=bquote(kWh/m^2))+labs(x="Year",y="")+theme(legend.position="bottom",legend.direction="horizontal")+scale_x_continuous(breaks=seq(2002,2018,2))
+```
 
-p
+```{r}
+g1
+```
+
+
+# Heat map of states and years: 1-2 family buildings
+
+
+```{r}
+g2
+```
+
+# Heat map of states and years: MFH + SFH combined
+
+```{r}
+g3
 ```
 
 
 
-```
-slopes_data <- data.frame(bundesland=states)
-slope_values_mfh <- NULL
-slope_values_sfh <- NULL
-slope_values_all <- NULL
-for (s in states) {
-  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
-  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
-  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
-  
-  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
-  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
-  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
-}
-slopes_data$MFH <- slope_values_mfh 
-slopes_data$SFH <- slope_values_sfh
-slopes_data$ALL <- slope_values_all
 
-library(sf)
-library(dplyr)
+# Slopes for the States - MFH
+
+```{r}
+abrechnungsjahr = 2002:2018
+lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_mfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_mfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_mfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_mfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_mfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_mfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_mfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_mfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_mfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_mfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_mfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_mfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_mfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_mfh_df[states[16]]) ~ abrechnungsjahr)
+```
+
+
+```{r}
+## barplot of slope parameters for all 16 bundesland
 library(ggplot2)
-DL_map <- st_read("D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE)
-#DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
-#                 stringsAsFactors = FALSE)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 ```
 
 
-
-
-```
-library(tmap)
-library(tmaptools)
-DL_map$MFH <- slopes_data$MFH #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("MFH",
-                               id="NAME_1",
-                               popup.vars=c("MFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-
-```
-DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("SFH",
-                               id="NAME_1",
-                               popup.vars=c("SFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-
-```
-DL_map$ALL <- slopes_data$ALL #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("ALL",
-                               id="NAME_1",
-                               popup.vars=c("ALL"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
+#Slopes for the states - SFH
 
 ```{r}
-i1 <- ggplot(data=absolute_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - absolute freq') +  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5),legend.position="none")
-
-i2 <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
-
-require(grid)
-require(gridExtra)
-
-grid.arrange(i1,i2,ncol=2)
-
-absolute_freq(DL_MFH)
-```
-
-
-```{r}
-i1 <- ggplot(data = absolute_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - absolute freq') +
-  theme(plot.title = element_text(hjust = 0.5),legend.position="none")
-
-i2 <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
-grid.arrange(i1,i2,ncol=2)
-
-#absolute_freq(DL_SFH)
+lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_sfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_sfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_sfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_sfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_sfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_sfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_sfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_sfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_sfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_sfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_sfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_sfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_sfh_df[states[16]]) ~ abrechnungsjahr)
 ```
 
 ```{r}
+## barplot of slope parameters for all 16 bundesland
+library(ggplot2)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
 
-i1 <- ggplot(data = absolute_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - absolute freq') +
-  theme(plot.title = element_text(hjust = 0.5),legend.position="none")
 
-i2 <-  ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
 
-grid.arrange(i1,i2,ncol=2)
-#absolute_freq(rbind(DL_SFH, DL_MFH))
+#Slopes for the states - ALL
+
+```{r}
+lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_all_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_all_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_all_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_all_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_all_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_all_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_all_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_all_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_all_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_all_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_all_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_all_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_all_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_all_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_all_df[states[16]]) ~ abrechnungsjahr)
 ```
 
 ```{r}
+## barplot of slope parameters for all 16 bundesland
+library(ggplot2)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
 
-get_absolute_frequencies_interactive <- function(data, title) {
-  bundlands_energietraeger <- absolute_freq_interactive(data)
-  
-  p <- plot_ly(type = 'bar', colors = "Blues") 
-  
-  v = TRUE
-  for (i in 1:length(states)) {
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
-                         x = 2002:2018, visible = v, colors = "Blues") 
-  
-    v = FALSE
-  }
-  
-  p <- p %>% layout(
-      xaxis = list(range = c(2002, 2018)),
-      barmode='stack',
-      colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
 
-  p <- p %>% layout(
-    title = title,
-    xaxis = list(title = "Year", range = c(2002, 2018)),
-    yaxis = list(title = "Value"),
-    updatemenus = list(
-      list(
-        buttons = get_visibility_combinations()
-      )
-    )
-  )
-return(p)
-}
-```
-```{r}
-library(plotly)
-library(tidyr)
-get_relative_frequencies_interactive <- function(data, title) {
-  bundlands_energietraeger <- relative_freq_interactive(data)
-  
-  p <- plot_ly(type = 'bar')
-  v = TRUE
-  for (i in 1:length(states)) {
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
-                         x = 2002:2018, visible = v)
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
-                         x = 2002:2018, visible = v)
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
-                         x = 2002:2018, visible = v)
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
-                         x = 2002:2018, visible = v)
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
-                         x = 2002:2018, visible = v)
-    p <- p %>% add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
-                         x = 2002:2018, visible = v)
-  
-    v = FALSE
-  }
-  
-  
-  p <- p %>% layout(
-      xaxis = list(range = c(2002, 2018)),
-      barmode='stack',
-      colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
-  
-  p <- p %>% layout(
-    title = title,
-    xaxis = list(title = "Year", range = c(2002, 2018)),
-    yaxis = list(title = "Value"),
-    barmode ='stack',
-    updatemenus = list(
-      list(
-        buttons = get_visibility_combinations()
-      )
-    )
-  )
-  return(p)
-}
-```
-```{r}
-library(plotly)
-library(tidyr)
 
-get_absolute_frequencies_interactive(DL_MFH, 'Energie Traeger MFH - absolute freq')
-```
-```{r}
-get_relative_frequencies_interactive(DL_MFH, 'Energie Traeger MFH -  relative freq')
-```
-```{r}
-library(plotly)
-library(tidyr)
+# Interactive plots (from html)
 
-get_absolute_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - absolute freq')
-```
-```{r}
-library(plotly)
-library(tidyr)
 
-get_relative_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - relative freq')
-```
+
+# SOM - MFH
 
 ```{r}
-library(plotly)
-library(tidyr)
-
-get_absolute_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - absolute freq')
+source(paste0(path_to_file,"getCentroidsFromShapeFile.R"))
+plot_som(DL_MFH)
 ```
+
+# SOM - SFH
 
 ```{r}
-library(plotly)
-library(tidyr)
-
-get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - relative freq')
+source(paste0(path_to_file,"getCentroidsFromShapeFile.R"))
+plot_som(DL_SFH)
 ```
+
+
+
+# Conclusions
+
+
+
+
+
+
+
+

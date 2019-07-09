@@ -1,16 +1,20 @@
 library(sf)
 library(dplyr)
 library(ggplot2)
-DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_2.shp",stringsAsFactors = FALSE)
+path_to_file_2 <- "D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
+#path_to_file_2 <- "~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
 
+#####################################################################################
+DL_map <- st_read( paste0(path_to_file_2,"gadm36_DEU_2.shp"),stringsAsFactors = FALSE,quiet=TRUE)
 centroids <- do.call(rbind,st_centroid(DL_map$geometry))
 centroids <- as.data.frame(centroids)
 centroids$landkreis <- DL_map$NAME_2
 names(centroids) <- c("longitude" , "latitude","Landkreis_von_GS")
+
 #https://github.com/r-spatial/sf/issues/75 (for extracting centroids from a shapefile)
 
 #this plots the map with the centrids also:
-ggplot() + geom_sf(data=DL_map) + geom_point(data=centroids,aes(x=longitude,y=latitude))
+#ggplot() + geom_sf(data=DL_map) + geom_point(data=centroids,aes(x=longitude,y=latitude))
 
 #see  https://gis.stackexchange.com/a/273382 for an approach which does not convert the centroids to a matrix and dataframe
 
@@ -18,7 +22,7 @@ ggplot() + geom_sf(data=DL_map) + geom_point(data=centroids,aes(x=longitude,y=la
 require(kohonen)
 require(RColorBrewer)
 
-head(DL_MFH)
+#head(DL_MFH)
 
 plot_som <- function(data) {
   total <- merge(data,centroids,by=c("Landkreis_von_GS"))
