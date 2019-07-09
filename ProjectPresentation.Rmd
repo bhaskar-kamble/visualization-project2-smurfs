@@ -487,11 +487,21 @@ plot_som(DL_SFH)
 
 
 
-# Conclusions
+# General Conclusions
 
 * One- to two-family buildings consume more energy than multi-family buildings. But their rate of decrease is faster.
 * The rate at which the specific consumption is decreasing is the most rapid for Schleswig-Holstein in case of multifamily buildings.
 * The rate at which the specific consumption is decreasing is the most rapid for Hamburg in case of one- to two- family buildings.
+
+# Conclusions from the SOM
+
+* A lot of the districts that are far north have higher consumption.
+
+* Middle eastern districts also had larger consumption.
+
+* There were interesting discoveries that lately some districts far north have lower consumption
+
+* Also, districts that belonged to Baden-Württemberg had newer buildings and a very small consumption
 
 
 
