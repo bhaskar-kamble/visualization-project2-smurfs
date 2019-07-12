@@ -1,8 +1,8 @@
 
-mfh_area <- read.csv2('MFHAreas_bundeslands.csv')
-sfh_area <- read.csv2('SFHAreas_bundeslands.csv')
-all_area <- read.csv2('Areas_SFH_MFH.csv')
-co2_coef <- read.csv('Germany_CO2_coefficients.txt')
+mfh_area <- read.csv2('~/Desktop/visualization-project2-smurfs/MFHAreas_bundeslands.csv')
+sfh_area <- read.csv2('~/Desktop/visualization-project2-smurfs/SFHAreas_bundeslands.csv')
+all_area <- read.csv2('~/Desktop/visualization-project2-smurfs/Areas_SFH_MFH.csv')
+co2_coef <- read.csv('~/Desktop/visualization-project2-smurfs/Germany_CO2_coefficients.txt')
 
 
 library(tidyr)
@@ -99,18 +99,18 @@ convert_area_to_co2_emissions_all<- function(data, energy_consumption_data, co2_
   for (year in c(2002:2018)) {
     for (et_t in et) {
       data[data$abrechnungsjahr == year,][[et_t]] <-  
-        data[data$abrechnungsjahr == year,]$area * 1000 *
+        data[data$abrechnungsjahr == year,]$area * 100 *
         averages[averages$abrechnungsjahr == year,][[et_t]] *
         co2_coef[co2_coef$jahr == year,][[et_t]]
     }
   }
   
-  data$erdgas <- data$erdgas / 10^2
-  data$fluessiggas <- data$fluessiggas / 10^2
-  data$heizoel <- data$heizoel / 10^2
-  data$strom <- data$strom / 10^2
-  data$holzpellets <- data$holzpellets / 10^2
-  data$waerme <- data$waerme / 10^2
+  data$erdgas <- data$erdgas / (10^12)
+  data$fluessiggas <- data$fluessiggas / (10^12)
+  data$heizoel <- data$heizoel / (10^12)
+  data$strom <- data$strom / (10^12)
+  data$holzpellets <- data$holzpellets / (10^12)
+  data$waerme <- data$waerme / (10^12)
   
   data
   
@@ -136,19 +136,19 @@ convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef
     for (state in unique(energy_consumption_data$bundesland)) {
       for (et_t in et) {
         data[data$abrechnungsjahr == year & data$bundesland == state,][[et_t]] <-  
-          data[data$abrechnungsjahr == year & data$bundesland == state,]$area * 1000 *
+          data[data$abrechnungsjahr == year & data$bundesland == state,]$area * 10^6 *
           averages[averages$abrechnungsjahr == year & averages$bundesland == state,][[et_t]] *
           co2_coef[co2_coef$jahr == year,][[et_t]]
       }
     }
   }
   
-  data$erdgas <- data$erdgas / 10^2
-  data$fluessiggas <- data$fluessiggas / 10^2
-  data$heizoel <- data$heizoel / 10^2
-  data$strom <- data$strom / 10^2
-  data$holzpellets <- data$holzpellets / 10^2
-  data$waerme <- data$waerme / 10^2
+  data$erdgas <- data$erdgas / (10^12)
+  data$fluessiggas <- data$fluessiggas / (10^12)
+  data$heizoel <- data$heizoel / (10^12)
+  data$strom <- data$strom / (10^12)
+  data$holzpellets <- data$holzpellets / (10^12)
+  data$waerme <- data$waerme / (10^12)
   
   data
 }
@@ -173,26 +173,17 @@ get_visibility_combinations_co2 <- function() {
 
 #########################################################################################
 
-<<<<<<< HEAD
-get_map_data_co2 <- function(year) {
-=======
-#get_map_data_co2() {
-#  enegietraeger <- unique(DL_MFH$energietraeger)
-#  convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
-#}
-
 get_map_data_co2 <- function() {
->>>>>>> a720390a950e1cf14be44f8f88afec3387a3e506
   enegietraeger <- unique(DL_MFH$energietraeger)
   mfh <- convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
   mfh$mean <- apply(mfh[enegietraeger], 1, sum)
   mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, 
-                    mean = mfh$mean)[abrechnungsjahr == year,]
+                    mean = mfh$mean)[abrechnungsjahr == 2018,]
 
   sfh <- convert_area_to_co2_emissions(sfh_area, DL_SFH, co2_coef)
   sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, sum)
   sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, 
-                    mean = sfh$mean)[abrechnungsjahr == year,]
+                    mean = sfh$mean)[abrechnungsjahr == 2018,]
 
   
   all_area_m <- sfh_area
@@ -204,21 +195,15 @@ get_map_data_co2 <- function() {
   all <- convert_area_to_co2_emissions(all_area_m, rbind(DL_MFH, DL_SFH), co2_coef)
   all$mean <- apply(all[enegietraeger], 1, sum)
   all <- data.frame(abrechnungsjahr = all$abrechnungsjahr, bundesland = all$bundesland, 
-                    mean = all$mean)[abrechnungsjahr == year,]
+                    mean = all$mean)[abrechnungsjahr == 2018,]
   
   
   data <-data.frame(bundesland = unique(DL_MFH$bundesland), MFH = rep(NA, 16), SFH = rep(NA, 16), ALL = rep(NA, 16))
   
   for (state in states) {
-    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean / 10^2
-    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean / 10^2
-    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean / 10^2
+    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean / (10^12)
+    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean / (10^12)
+    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean / (10^12)
   }
   data
-<<<<<<< HEAD
 }
-=======
-}
-
-get_map_data_co2()
->>>>>>> a720390a950e1cf14be44f8f88afec3387a3e506

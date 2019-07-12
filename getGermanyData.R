@@ -1,7 +1,7 @@
 getGermanyData <- function(gtype) { #gtype can be either SFH or MFH
   
-  #path_to_file <- "~/Desktop/visualization-project2-smurfs"
-  path_to_file <- "."
+  path_to_file <- "~/Desktop/visualization-project2-smurfs"
+  #path_to_file <- "."
   
   if (gtype == "SFH") {
     load( paste0(path_to_file , "/", "SFH20022018_v3.RData"))
