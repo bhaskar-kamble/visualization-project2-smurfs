@@ -3,10 +3,10 @@
 #all_area <- read.csv2('~/Desktop/visualization-project2-smurfs/Areas_SFH_MFH.csv')
 #co2_coef <- read.csv('~/Desktop/visualization-project2-smurfs/Germany_CO2_coefficients.txt')
 
-mfh_area <- read.csv2('MFHAreas_bundeslands.csv')
-sfh_area <- read.csv2('SFHAreas_bundeslands.csv')
-all_area <- read.csv2('Areas_SFH_MFH.csv')
-co2_coef <- read.csv('Germany_CO2_coefficients.txt')
+mfh_area <- read.csv2('D:/GITHUB_REPOS/visualization-project2-smurfs/MFHAreas_bundeslands.csv')
+sfh_area <- read.csv2('D:/GITHUB_REPOS/visualization-project2-smurfs/SFHAreas_bundeslands.csv')
+all_area <- read.csv2('D:/GITHUB_REPOS/visualization-project2-smurfs/Areas_SFH_MFH.csv')
+co2_coef <- read.csv('D:/GITHUB_REPOS/visualization-project2-smurfs/Germany_CO2_coefficients.txt')
 
 library(tidyr)
 average_by_year_bundesland <- function(data) {
@@ -183,7 +183,7 @@ get_map_data_co2 <- function() {
   mfh$mean <- apply(mfh[enegietraeger], 1, sum)
   mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, 
                     mean = mfh$mean)[abrechnungsjahr == 2018,]
-
+  
   sfh <- convert_area_to_co2_emissions(sfh_area, DL_SFH, co2_coef)
   sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, sum)
   sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, 
