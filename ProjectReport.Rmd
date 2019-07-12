@@ -791,7 +791,7 @@ get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per f
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland (Megatonnes)')
 ```
 
 ```{r}
@@ -802,7 +802,7 @@ get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per f
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland  (Megatonnes)')
 ```
 
 
