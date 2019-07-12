@@ -57,6 +57,9 @@ DL_MFH <- getBundeslandfromCode(DL_MFH)
 DL_SFH <- getBundeslandfromCode(DL_SFH)
 DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
+```
+
+```{r}
 source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
 source(paste0(path_to_file , "getCo2Emissions.R"))
 
