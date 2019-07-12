@@ -19,7 +19,9 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 # 1. Abstract
 
 The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of [co2online.de](www.co2online.de), which has information on more than two million households in this time frame. The information was provided by private individuals, who gave information relating to the building's energy consumption for a year and features relating to the building (age, area, fuel type, refurbishment measures already carried out, etc.) in return for an evaluation of the building's energy efficiency and suggested refurbishment
-measures. The data are signifiicant from a political perspective, since energy consumption and 
+measures. The data are signifiicant from a political perspective, since energy consumption and the related CO2 emissions are major concerns in the backdrop of global warming and climate change.
+
+All files used in this project are to be found in this [github](https://github.com/bhaskar-kamble/visualization-project2-smurfs) repository.
 
 
 # 2. Source of the data
@@ -176,26 +178,30 @@ ALL_spez_verbrauch$temp <- temp_winter[,2]
 ```
 
 
-```{r}
+
+```{r,fig.cap="\\label{fig:figs}Fig. 5: Multiple linear regression with year as continuous variable and building type as categorical variable without interaction between the two variables."}
 ## Multiple regression model without interaction  for MFH_SFH_spez_verbrauch
 fit1=lm(spz_verbrauch ~ abrechnungsjahr + as.factor(gtype),data = MFH_SFH_spez_verbrauch)
-summary(fit1)
+#summary(fit1)
 # for MFH
 equation1=function(x){coef(fit1)[2]*x+coef(fit1)[1]}
 
 # for SFH
 equation2=function(x){coef(fit1)[2]*x+coef(fit1)[1]+coef(fit1)[3]}
 
-
 ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype))+geom_point()+
         stat_function(fun=equation1,geom="line",color=scales::hue_pal()(2)[1])+
-        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150)) 
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(limits=c(0,150)) +labs(x="Year", y=bquote("Specific Consumption" ~ (kWh/m^2)) )
+```
 
 
 
+Adding interaction terms to a regression model can greatly expand understanding of the relationships among the variables in the model and allows more hypotheses to be tested.  The presence of a significant interaction indicates that the effect of one predictor variable on the response variable is different at different values of the other predictor variable. It would be useful to add an interaction term to the model if we wanted to test the hypothesis that the relationship between the abrechnungsjahr on the spz_verbrauch was different in buiding type i.e. mfh and sfh. The next figure shows the result of adding such an interaction term in the model.
+
+```{r,fig.cap="\\label{fig:figs}Fig. 6: Multiple linear regression with year as continuous variable and building type as categorical variable with interaction between the two variables."}
 ## Multiple regression model with interaction 
 fit2=lm(spz_verbrauch ~ abrechnungsjahr*as.factor(gtype),data = MFH_SFH_spez_verbrauch)
-summary(fit2)
+#summary(fit2)
 
 
 # for MFH
@@ -207,15 +213,15 @@ equation2=function(x){(coef(fit2)[2]+coef(fit2)[4])*x+(coef(fit2)[1]+coef(fit2)[
 
 ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype))+geom_point()+
         stat_function(fun=equation1,geom="line",color=scales::hue_pal()(2)[1])+
-        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150)) 
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(limits=c(0,150))+labs(x="Year", y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
-When we use interaction between the year and the building type we get a better fit to the data. We next use a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably).
+When we use interaction between the year and the building type it explains the data better. We next use a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably).
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 7: Specific consumption as a function of temperature grouped by the year categories for multifamily buildings. The linear trends with temperature as continuous variable and year (binned) as categorical variable."}
 # effect of temperature on MFH
 fit3=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = MFH_spez_verbrauch)
-summary(fit3)
+#summary(fit3)
 
 # for 1st
 equation1=function(x){coef(fit3)[2]*x+coef(fit3)[1]}
@@ -234,17 +240,17 @@ ggplot(MFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+
         stat_function(fun=equation2,geom="line",color=scales::hue_pal()(4)[2])+
         stat_function(fun=equation3,geom="line",color=scales::hue_pal()(4)[3])+
         stat_function(fun=equation4,geom="line",color=scales::hue_pal()(4)[4])+
-        labs(title="EFFECT OF TEMPERTURE IN MFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+        labs(title="EFFECT OF TEMPERATURE IN MFH")+scale_x_continuous( limits=c(-2,5))+scale_y_continuous(limits=c(0,150))+labs(x="Temperature (degrees Celsius)" , y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
 
 The above graph shows that the increase in temperature is not the sole reason for the decrease in specific consumption of energy. Refurbishment measures also play an important role. As expected, with increasing temperature, the specific energy consumption decreases. But for the four groups of `abrechnungsjahr`, the energy consumption perceptibly decreases following the temporal passage of the years.
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 8: Specific consumption as a function of temperature grouped by the year categories for 1-2 family buildings. The linear trends with temperature as continuous variable and year (binned) as categorical variable."}
 # effect of temperature on SFH
 fit4=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = SFH_spez_verbrauch)
-summary(fit4)
+#summary(fit4)
 
 # for 1st
 equation1=function(x){coef(fit4)[2]*x+coef(fit4)[1]}
@@ -263,7 +269,7 @@ ggplot(SFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+
         stat_function(fun=equation2,geom="line",color=scales::hue_pal()(4)[2])+
         stat_function(fun=equation3,geom="line",color=scales::hue_pal()(4)[3])+
         stat_function(fun=equation4,geom="line",color=scales::hue_pal()(4)[4])+
-        labs(title="EFFECT OF TEMPERTURE IN SFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+        labs(title="EFFECT OF TEMPERTURE IN SFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(limits=c(0,150))+labs(x="Temperature (degrees Celsius)"  , y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
 
@@ -504,9 +510,9 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 
 # 5a Energy consumption per fuel
 
-The following figure shows the proportions of energy produced by the different fuels.
+In this section we find the total energy produced by the different fuel sources used for heating of residential buildings. Since the data from co2online provide us with the specific energy consumption, we can multiply these with the offical numbers for the areas of residential buildings in Germany. The following figure is an interactive graph showing the proportions of energy produced by the different fuels for multifamily, 1-2 family, and both combined building types. The building type can be chosen from the drop down on the left.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 5"}
+```{r,fig.cap="\\label{fig:figs}Fig. 8: Proportions of energy produced by the different fuels. Please use the drop down menu to choose the building type."}
 get_relative_frequencies_interactive_all()
 ```
 First let's point out that the heizoel is the most non eco-freindly fuel.
@@ -520,9 +526,9 @@ which is not the case for single-family houses where the heizoel is kind of cons
 
 # 5b CO2 Emissons in all Germany
 
-The following figure shows the co2 emitted in Germany.
+The following figure is an interactive graph showing the co2 emitted in Germany by the various fuel sources. The drop down menu on the left enables one to select the building type.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 6"}
+```{r,fig.cap="\\label{fig:figs}Fig. 9: CO2 emissions by the different fuel types. Please use the drop down menu to choose the building type."}
 get_co2_emissions_interactive_all()
 ```
 When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany,
