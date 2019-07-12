@@ -43,10 +43,75 @@ average_by_year_bundesland_energietrager <- function(data) {
   return(as.data.frame(data_wide))
 }
 
-head(average_by_year_bundesland_energietrager(DL_MFH))
+average_by_year <- function(data) {
+  
+  average_consumption_mfh <- aggregate(data[,c('abrechnungsjahr',  'verbrauch_gesamt_kwh_spez')][c(-1)], 
+                                       by=list(data$abrechnungsjahr), FUN=sum)
+  
+  colnames(average_consumption_mfh) <- c('abrechnungsjahr', 'verbrauch_gesamt_kwh_spez')
+  
+  return(average_consumption_mfh)
+}
 
 
+##############################################
+average_by_year_energietrager <- function(data) {
+  
+  avg_bundesland_year <- average_by_year(data)
+  data_aggregated <- aggregate(data[,c('abrechnungsjahr', 'energietraeger', 'verbrauch_gesamt_kwh_spez')][c(-1, -2)], 
+                               by=list(data$abrechnungsjahr, data$energietraeger), FUN=sum)
+  
+  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger', 'verbrauch_gesamt_kwh_spez')
+  
+  data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, fill = list(verbrauch_gesamt_kwh_spez = 0)))
+  
+  for (year in c(2002:2018)) {
+      for (energietraeger in unique(data_aggregated$energietraeger)) {
+        data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez <- 
+          data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez / 
+          avg_bundesland_year[avg_bundesland_year$abrechnungsjahr == year, ]$verbrauch_gesamt_kwh_spez
+    }
+  }
+  
+  data_wide <- spread(data_aggregated, energietraeger, verbrauch_gesamt_kwh_spez)
+  data_wide
+  
+  return(as.data.frame(data_wide))
+}
 
+DL_MFH
+convert_area_to_co2_emissions_all<- function(data, energy_consumption_data, co2_coef) {
+  
+  et <- unique(energy_consumption_data$energietraeger)
+  averages <- average_by_year_energietrager(energy_consumption_data)
+  averages <- averages[-17,]
+
+  
+  names(co2_coef) <- tolower(names(co2_coef))
+  if (unique(energy_consumption_data$gtype) == "MFH") {
+    data <- data.frame(abrechnungsjahr = data$Jahr, area = data$AreaMFH)
+  }
+  else if (unique(energy_consumption_data$gtype) == "SFH") {
+    data <- data.frame(abrechnungsjahr = data$Jahr, area = data$AreaSFH)
+  }
+  else {
+    data <- data.frame(abrechnungsjahr = data$Jahr, area = (data$AreaMFH + data$AreaSFH))
+  }
+  for (et_t in et) {
+    data[[et_t]] <- rep(NA, 16)
+  }
+  for (year in c(2002:2018)) {
+      for (et_t in et) {
+        data[data$abrechnungsjahr == year,][[et_t]] <-  
+          data[data$abrechnungsjahr == year,]$area * 1000 *
+          averages[averages$abrechnungsjahr == year,][[et_t]] *
+          co2_coef[co2_coef$jahr == year,][[et_t]]
+      }
+  }
+  
+  data
+}
+convert_area_to_co2_emissions_all(all_area,  DL_SFH, co2_coef)
 
 #################################################################################################
 
@@ -55,6 +120,7 @@ sfh_area <- read.csv2('SFHAreas_bundeslands.csv')
 all_area <- read.csv2('Areas_SFH_MFH.csv')
 co2_coef <- read.csv('Germany_CO2_coefficients.txt')
 states
+all_area
 convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef) {
   
   et <- unique(energy_consumption_data$energietraeger)
@@ -71,7 +137,7 @@ convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef
     for (state in unique(energy_consumption_data$bundesland)) {
       for (et_t in et) {
         data[data$abrechnungsjahr == year & data$bundesland == state,][[et_t]] <-  
-          data[data$abrechnungsjahr == year & data$bundesland == state,]$area
+          data[data$abrechnungsjahr == year & data$bundesland == state,]$area * 1000 *
           averages[averages$abrechnungsjahr == year & averages$bundesland == state,][[et_t]] *
           co2_coef[co2_coef$jahr == year,][[et_t]]
       }
@@ -80,4 +146,6 @@ convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef
   
   data
 }
-head(convert_area_to_co2_emissions(mfh_area, DL_MFH, co2_coef))
+convert_area_to_co2_emissions(mfh_area, DL_MFH, co2_coef)
+
+
