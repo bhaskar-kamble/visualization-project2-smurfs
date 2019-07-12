@@ -159,7 +159,37 @@ get_visibility_combinations_co2 <- function() {
 
 #########################################################################################
 
-get_map_data_co2() {
+get_map_data_co2 <- function() {
   enegietraeger <- unique(DL_MFH$energietraeger)
-  convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
+  mfh <- convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
+  mfh$mean <- apply(mfh[enegietraeger], 1, mean)
+  mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, mean = mfh$mean)[abrechnungsjahr == 2018,]
+
+  sfh <- convert_area_to_co2_emissions(sfh_area, DL_SFH, co2_coef)
+  sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, mean)
+  sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, mean = sfh$mean)[abrechnungsjahr == 2018,]
+
+  
+  all_area <- sfh_area
+  names(all_area) <- c('abrechnungsjahr', states)
+  names(mfh_area) <- c('abrechnungsjahr', states)
+  for (state in states) {
+    all_area[[state]] <- as.numeric(as.character(all_area[[state]])) + as.numeric(as.character(mfh_area[[state]]))
+  }
+  all_area
+  all <- convert_area_to_co2_emissions(all_area, rbind(DL_MFH, DL_SFH), co2_coef)
+  all$mean <- apply(all[enegietraeger], 1, mean)
+  all <- data.frame(abrechnungsjahr = all$abrechnungsjahr, bundesland = all$bundesland, mean = all$mean)[abrechnungsjahr == 2018,]
+  
+  
+  data <-data.frame(bundesland = unique(DL_MFH$bundesland), MFH = rep(NA, 16), SFH = rep(NA, 16), ALL = rep(NA, 16))
+  
+  for (state in states) {
+    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean
+    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean
+    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean
+  }
+  data
 }
+
+get_map_data_co2()

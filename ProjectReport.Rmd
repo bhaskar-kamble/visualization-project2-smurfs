@@ -810,7 +810,30 @@ get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions b
 ```{r}
 library(tmap)
 library(tmaptools)
-DL_map$MFH <- slopes_data$MFH
+
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+map_data <- get_map_data_co2()
+
+DL_map$ALL <- map_data$ALL
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("ALL",
+                               id="NAME_1",
+                               popup.vars=c("ALL"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+```{r}
+library(tmap)
+library(tmaptools)
+
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+
+DL_map$MFH <- map_data$MFH
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("MFH",
                                id="NAME_1",
@@ -822,8 +845,23 @@ tm_shape(DL_map) + tm_polygons("MFH",
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
 
+```{r}
+library(tmap)
+library(tmaptools)
 
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
 
+DL_map$SFH <- map_data$SFH
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("SFH",
+                               id="NAME_1",
+                               popup.vars=c("SFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
 
 
 ```{r}
