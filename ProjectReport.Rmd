@@ -43,8 +43,6 @@ source(paste0(path_to_file , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "getBundeslandfromLK.R"))
 source(paste0(path_to_file , "getSpecificConsumptionByYear.R"))
 source(paste0(path_to_file , "getConsumptionPerEnergieTraeger.R"))
-source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
-source(paste0(path_to_file , "getCo2Emissions.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -59,6 +57,9 @@ DL_MFH <- getBundeslandfromCode(DL_MFH)
 DL_SFH <- getBundeslandfromCode(DL_SFH)
 DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
+source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
+source(paste0(path_to_file , "getCo2Emissions.R"))
+
 ```
 
 

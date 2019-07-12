@@ -22,10 +22,10 @@ lm16 <- lm(as.matrix(bundSV_mfh_sfh_df[states[16]] ) ~ abrechnungsjahr*as.factor
 as.logical(as.numeric(as.factor(bundSV_mfh_sfh_df$gtype))-1)
 
 p <- plot_ly(bundSV_mfh_sfh_df , x = rep(abrechnungsjahr, 2), 
-             color = ~as.logical(as.numeric(as.factor(gtype))-1),  colors = c("#132B43", "#56B1F7")) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_lines(y = ~fitted(lm1),
-            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F)
+             color = ~as.factor(gtype),  colors = c("#132B43", "#56B1F7")) %>%
+  add_markers(y = ~get(states[1]), name = " ") %>%
+  add_lines(y = fitted(lm1),
+            line = list(), showlegend = TRUE, visible = T)
 %>%
   
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
