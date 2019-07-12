@@ -4,6 +4,7 @@ author: "Ivana Trajanovska, Pallavi Mitra and Bhaskar Kamble"
 date: "23 Juni 2019"
 output: 
   html_document:
+    code_folding: hide
     toc: true
     toc_depth: 3
     theme: united
@@ -142,11 +143,11 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 
 
 
-# 5. Energy consumption trends across the 16 Federal states
+# 6. Energy consumption trends across the 16 Federal states
 
 In this section we consider trends in the specific energy consumption for each of the 16 federal states in Germany.
 
-## 5a. Creating the dataframes
+## 6a. Creating the dataframes
 
 First we create data frames for `MFH`, `SFH` and `ALL` types of buildings.
 
@@ -188,7 +189,7 @@ bundSV_mfh_df
 
 In the next sections we explore several visualization techniques for the above data.
 
-## 5b. Specific Energy Consumption for MFH for the federal states
+## 6b. Specific Energy Consumption for MFH for the federal states
 
 The next plot shows the specific energy consumption for the 16 federal states in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
 
@@ -247,12 +248,15 @@ p <- p %>% layout(showlegend=FALSE,
 )
 ```
 
-```{r,fig.cap="\\label{fig:figs}Fig. 5: Interactive plot for the specific energy consumption for the 16 federal states from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 5: Interactive plot for the specific energy consumption for the 16 federal states for multifamily houses from 2002-2018."}
 p
 ```
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 6: Heat map of the specific energy consumption for the year and the state"}
+We can collect the data from all the states and years into a single heat map as follows:
+
+
+```{r,fig.cap="\\label{fig:figs}Fig. 6: Heat map of the specific energy consumption for the year and the state for multifamily houses."}
 library(plotly)
 
 tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
@@ -267,8 +271,9 @@ p
 ```
 
 
+The heat map above shows that Schleswig-Hosltein has quite high energy consumption comapred to the other states in the beginning, which can also be verified from the interactive plot in Fig. 5. For a comparison of how fast the specific energy consumption is falling, we have plotted the bar plots of the absolute values of the slopes of the linear trends in the next graph.
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 7: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany"}
 abrechnungsjahr = 2002:2018
 lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
@@ -296,7 +301,11 @@ p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip
 p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 ```
 
-```{r}
+
+We have presented the same data as above in an interactive map of the 16 federal states in the next figure. Please click on the respective state to see its name and the slope value in kWh/Year.
+
+
+```{r,fig.cap="\\label{fig:figs}Fig. 8: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
 slopes_data <- data.frame(bundesland=states)
 slope_values_mfh <- NULL
 slope_values_sfh <- NULL
@@ -320,9 +329,7 @@ library(ggplot2)
 DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
 #DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
 #                 stringsAsFactors = FALSE)
-```
 
-```{r}
 library(tmap)
 library(tmaptools)
 DL_map$MFH <- slopes_data$MFH
@@ -353,9 +360,9 @@ tm_shape(DL_map) + tm_polygons("MFH",
 
 
 
-## 5c. Specific Energy Consumption for 1-2 Family Houses for the federal states
+## 6c. Specific Energy Consumption for 1-2 Family Houses for the federal states
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 9:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
 p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
@@ -389,7 +396,8 @@ p
 ```
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 10:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
+
 library(plotly)
 
 tmp <- aggregate(DL_SFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_SFH$bundesland, DL_SFH$abrechnungsjahr), FUN = mean)
@@ -405,7 +413,7 @@ p
 
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 11:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
 lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
@@ -876,13 +884,13 @@ tm_shape(DL_map) + tm_polygons("SFH",
 ```
 
 
-```{r}
+```
 library(plotly)
 library(tidyr)
 plot_som(DL_MFH)
 ```
 
-```{r}
+```
 library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
