@@ -251,7 +251,7 @@ p <- p %>% layout(showlegend=FALSE,
 )
 ```
 
-```{r,fig.cap="\\label{fig:figs}Fig. 7: Heat map of $\\Delta E$ for color34, 85 and 87 across card positions and sheets."}}
+```{r,fig.cap="\\label{fig:figs}Fig. 7: Heat map"}
 p
 ```
 
