@@ -155,3 +155,11 @@ get_visibility_combinations_co2 <- function() {
   }
   return(visibility_combinations)
 }
+
+
+#########################################################################################
+
+get_map_data_co2() {
+  enegietraeger <- unique(DL_MFH$energietraeger)
+  convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
+}

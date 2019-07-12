@@ -806,6 +806,21 @@ get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions b
 ```
 
 
+```{r}
+library(tmap)
+library(tmaptools)
+DL_map$MFH <- slopes_data$MFH
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("MFH",
+                               id="NAME_1",
+                               popup.vars=c("MFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
 
 
 
