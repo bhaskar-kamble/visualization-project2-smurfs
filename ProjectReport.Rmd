@@ -650,9 +650,8 @@ get_co2_emissions_interactive_all <- function() {
   bundlands_energietraeger_all <- convert_area_to_co2_emissions_all(all_area, rbind(DL_MFH, DL_SFH), co2_coef)
   bundlands_energietraeger_mfh <- convert_area_to_co2_emissions_all(all_area, DL_MFH, co2_coef)
   bundlands_energietraeger_sfh <- convert_area_to_co2_emissions_all(all_area , DL_SFH, co2_coef)
-  
   x_axis <- 2002:2017
-  p <- plot_ly(x = ~x_axis, type="scatter", mode="markers+lines")
+  p <- plot_ly(type="scatter", mode="markers+lines")
   v = TRUE
   for (i in 1:3) {
     if (i == 3)
@@ -661,17 +660,17 @@ get_co2_emissions_interactive_all <- function() {
       data <-  bundlands_energietraeger_mfh
     else
       data <- bundlands_energietraeger_all
-    p <- add_trace(p,y = data$erdgas, name = 'Erdgas',  x =  ~x_axis, visible = v, type = 'scatter',
+     p <- p %>% add_trace(x = x_axis, y = data$erdgas, name = 'Erdgas', visible = v, type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = data$fluessiggas, name = 'Fluessiggas', x = ~x_axis, visible = v, type = 'scatter',
+     p <- p %>% add_trace(x = x_axis, y = data$fluessiggas, name = 'Fluessiggas', visible = v, type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = data$heizoel, name = 'Heizoel', x = ~x_axis, visible = v, type = 'scatter',
+     p <- p %>% add_trace(x = x_axis, y = data$heizoel, name = 'Heizoel', visible = v, type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y =data$holzpellets, name = 'Holzpellets', x = ~x_axis, visible = v, type = 'scatter',
+     p <- p %>% add_trace(x = x_axis, y =data$holzpellets, name = 'Holzpellets',visible = v, type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = data$strom, name = 'Strom', x = ~x_axis, visible = v, type = 'scatter',
+     p <- p %>%add_trace(x = x_axis, y = data$strom, name = 'Strom', visible = v, type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p, y = data$waerme, name = 'Waerme', x = ~x_axis, visible = v, type = 'scatter',
+     p <- p %>% add_trace(x = x_axis, y = data$waerme, name = 'Waerme', visible = v, type = 'scatter',
              mode = 'lines+markers') 
     v = FALSE
   }
@@ -682,7 +681,7 @@ get_co2_emissions_interactive_all <- function() {
       colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
   
   p <- p %>% layout(
-    title = 'CO2 Emissions in all Germany',
+    title = 'CO2 Emissions in all Germany (Megatonnes)',
     xaxis = list(title = "Year", range = c(2001, 2018)),
     yaxis = list(title = "Value"),
     barmode ='stack',
@@ -704,35 +703,35 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
   bundlands_energietraeger <- convert_area_to_co2_emissions(data, energy_consumption_data, co2_coef)
   
   x_axis <- 2002:2018
-  p <- plot_ly(x = ~x_axis, type="scatter", mode="markers+lines")
+  p <- plot_ly(type="scatter", mode="markers+lines")
   v = TRUE
   for (i in 1:length(states)) {
-    p <- add_trace(p,y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
-                         x =  ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$erdgas, name = 'Erdgas',  
+                         x =  x_axis, visible = v,
              type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
-                         x = ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$fluessiggas, name = 'Fluessiggas',  
+                         x = x_axis, visible = v,
                          
              type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
-                         x = ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$heizoel, name = 'Heizoel',  
+                         x = x_axis, visible = v,
                          
              type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
-                         x = ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$holzpellets, name = 'Holzpellets',  
+                         x = x_axis, visible = v,
                          
              type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p,y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
-                         x = ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$strom, name = 'Strom',  
+                         x = x_axis, visible = v,
                          
              type = 'scatter',
              mode = 'lines+markers') 
-    p <- add_trace(p, y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
-                         x = ~x_axis, visible = v,
+    p <- p %>%  add_trace(y = bundlands_energietraeger[bundlands_energietraeger$bundesland == states[[i]],]$waerme, name = 'Waerme',  
+                         x = x_axis, visible = v,
                          
              type = 'scatter',
              mode = 'lines+markers') 
@@ -789,7 +788,7 @@ get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per f
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland (Megatonnes)')
 ```
 
 ```{r}
@@ -800,14 +799,37 @@ get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per f
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland  (Megatonnes)')
 ```
 
 
 ```{r}
 library(tmap)
 library(tmaptools)
-DL_map$MFH <- slopes_data$MFH
+
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+map_data <- get_map_data_co2()
+
+DL_map$ALL <- map_data$ALL
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("ALL",
+                               id="NAME_1",
+                               popup.vars=c("ALL"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+```{r}
+library(tmap)
+library(tmaptools)
+
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+
+DL_map$MFH <- map_data$MFH
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("MFH",
                                id="NAME_1",
@@ -819,8 +841,23 @@ tm_shape(DL_map) + tm_polygons("MFH",
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
 
+```{r}
+library(tmap)
+library(tmaptools)
 
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
 
+DL_map$SFH <- map_data$SFH
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("SFH",
+                               id="NAME_1",
+                               popup.vars=c("SFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
 
 
 ```{r}
