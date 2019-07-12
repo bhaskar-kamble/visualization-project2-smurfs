@@ -8,6 +8,8 @@ sfh_area <- read.csv2('D:/GITHUB_REPOS/visualization-project2-smurfs/SFHAreas_bu
 all_area <- read.csv2('D:/GITHUB_REPOS/visualization-project2-smurfs/Areas_SFH_MFH.csv')
 co2_coef <- read.csv('D:/GITHUB_REPOS/visualization-project2-smurfs/Germany_CO2_coefficients.txt')
 
+states <- sort(unique(DL_MFH$bundesland))
+
 library(tidyr)
 average_by_year_bundesland <- function(data) {
   
