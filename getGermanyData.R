@@ -1,10 +1,10 @@
 getGermanyData <- function(gtype) { #gtype can be either SFH or MFH
   
   #path_to_file <- "~/Desktop/visualization-project2-smurfs"
-  path_to_file <- "."
+  path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
   
   if (gtype == "SFH") {
-    load( paste0(path_to_file , "/", "SFH20022018_v3.RData"))
+    load( paste0(path_to_file , "SFH20022018_v3.RData"))
     
     SFH20022018$abrechnungsjahr <- as.integer(SFH20022018$abrechnungsjahr)
     SFH20022018$verbrauch_gesamt_kwh <- gsub("," , "." , SFH20022018$verbrauch_gesamt_kwh)
@@ -23,7 +23,7 @@ getGermanyData <- function(gtype) { #gtype can be either SFH or MFH
   }
 
   if (gtype == "MFH") {
-    load( paste0(path_to_file , "/", "MFH20022018_v3.RData"))
+    load( paste0(path_to_file , "MFH20022018_v3.RData"))
     MFH20022018$gtype <- "MFH"
     
     MFH20022018 <- MFH20022018[MFH20022018$energietraeger != "braunkohle" , ]

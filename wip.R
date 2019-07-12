@@ -1,178 +1,91 @@
-setwd('~/Desktop/visualization-project2-smurfs')
+bundSV_mfh_sfh_df <- rbind(bundSV_mfh_df, bundSV_sfh_df)
 
 
-# 1.
+bundSV_mfh_sfh_df$gtype <- c(rep('MFH', 17), rep('SFH', 17))
+bundSV_mfh_sfh_df
+lm1 <- lm(as.matrix(bundSV_mfh_sfh_df[states[1]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm2 <- lm(as.matrix(bundSV_mfh_sfh_df[states[2]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm3 <- lm(as.matrix(bundSV_mfh_sfh_df[states[3]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm4 <- lm(as.matrix(bundSV_mfh_sfh_df[states[4]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm5 <- lm(as.matrix(bundSV_mfh_sfh_df[states[5]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm6 <- lm(as.matrix(bundSV_mfh_sfh_df[states[6]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm7 <- lm(as.matrix(bundSV_mfh_sfh_df[states[7]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm8 <- lm(as.matrix(bundSV_mfh_sfh_df[states[8]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm9 <- lm(as.matrix(bundSV_mfh_sfh_df[states[9]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm10 <- lm(as.matrix(bundSV_mfh_sfh_df[states[10]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm11 <- lm(as.matrix(bundSV_mfh_sfh_df[states[11]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm12 <- lm(as.matrix(bundSV_mfh_sfh_df[states[12]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm13 <- lm(as.matrix(bundSV_mfh_sfh_df[states[13]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm14 <- lm(as.matrix(bundSV_mfh_sfh_df[states[14]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm15 <- lm(as.matrix(bundSV_mfh_sfh_df[states[15]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm16 <- lm(as.matrix(bundSV_mfh_sfh_df[states[16]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+as.logical(as.numeric(as.factor(bundSV_mfh_sfh_df$gtype))-1)
 
-mfh_area <- read.csv('MFHAreas_bundeslands.csv')
-sfh_area <- read.csv('SFHAreas_bundeslands.csv')
+p <- plot_ly(bundSV_mfh_sfh_df , x = rep(abrechnungsjahr, 2), 
+             color = ~as.logical(as.numeric(as.factor(gtype))-1),  colors = c("#132B43", "#56B1F7")) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_lines(y = ~fitted(lm1),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F)
+%>%
+  
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm2),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm3),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm4),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm5),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm6),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm7),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm8),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm9),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm10),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm11),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm12),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm13),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm14),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_lines(y = ~fitted(lm15),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+  
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)%>%
+  add_lines(y = ~fitted(lm16),
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F)
 
-
-library(tidyr)
-average_by_year_bundesland <- function(data) {
-  
-  average_consumption_mfh <- aggregate(data[,c('abrechnungsjahr', 'bundesland', 'verbrauch_gesamt_kwh_spez')][c(-1, -2)], 
-                                       by=list(data$abrechnungsjahr, data$bundesland), FUN=sum)
-  
-  colnames(average_consumption_mfh) <- c('abrechnungsjahr', 'bundesland', 'verbrauch_gesamt_kwh_spez')
-  
-  return(average_consumption_mfh)
-}
-average_by_year_bundesland_energietrager <- function(data) {
-  
-  avg_bundesland_year <- average_by_year_bundesland(data)
-  data_aggregated <- aggregate(data[,c('abrechnungsjahr', 'bundesland', 'energietraeger', 'verbrauch_gesamt_kwh_spez')][c(-1, -2, -3)], 
-                                       by=list(data$abrechnungsjahr, data$bundesland, data$energietraeger), FUN=sum)
-  
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'bundesland', 'energietraeger', 'verbrauch_gesamt_kwh_spez')
-
-  data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, bundesland, fill = list(verbrauch_gesamt_kwh_spez = 0)))
-  
-  for (year in c(2002:2018)) {
-    for (state in unique(data_aggregated$bundesland)) {
-      for (energietraeger in unique(data_aggregated$energietraeger)) {
-           data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$bundesland == state & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez <- 
-        data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$bundesland == state & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez / 
-        avg_bundesland_year[avg_bundesland_year$abrechnungsjahr == year & avg_bundesland_year$bundesland == state, ]$verbrauch_gesamt_kwh_spez
-           }
-    }
-  }
-  
-  data_wide <- spread(data_aggregated, energietraeger, verbrauch_gesamt_kwh_spez)
-  data_wide
-  
-  return(as.data.frame(data_wide))
-}
-
-average_by_year <- function(data) {
-  
-  average_consumption_mfh <- aggregate(data[,c('abrechnungsjahr',  'verbrauch_gesamt_kwh_spez')][c(-1)], 
-                                       by=list(data$abrechnungsjahr), FUN=sum)
-  
-  colnames(average_consumption_mfh) <- c('abrechnungsjahr', 'verbrauch_gesamt_kwh_spez')
-  
-  return(average_consumption_mfh)
-}
-
-
-##############################################
-average_by_year_energietrager <- function(data) {
-  
-  avg_bundesland_year <- average_by_year(data)
-  data_aggregated <- aggregate(data[,c('abrechnungsjahr', 'energietraeger', 'verbrauch_gesamt_kwh_spez')][c(-1, -2)], 
-                               by=list(data$abrechnungsjahr, data$energietraeger), FUN=sum)
-  
-  colnames(data_aggregated) <- c('abrechnungsjahr', 'energietraeger', 'verbrauch_gesamt_kwh_spez')
-  
-  data_aggregated <- as.data.frame(complete(data_aggregated, abrechnungsjahr, energietraeger, fill = list(verbrauch_gesamt_kwh_spez = 0)))
-  
-  for (year in c(2002:2018)) {
-      for (energietraeger in unique(data_aggregated$energietraeger)) {
-        data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez <- 
-          data_aggregated[data_aggregated$abrechnungsjahr == year & data_aggregated$energietraeger == energietraeger, ]$verbrauch_gesamt_kwh_spez / 
-          avg_bundesland_year[avg_bundesland_year$abrechnungsjahr == year, ]$verbrauch_gesamt_kwh_spez
-    }
-  }
-  
-  data_wide <- spread(data_aggregated, energietraeger, verbrauch_gesamt_kwh_spez)
-  data_wide
-  
-  return(as.data.frame(data_wide))
-}
-
-DL_MFH
-convert_area_to_co2_emissions_all<- function(data, energy_consumption_data, co2_coef) {
-  
-  et <- unique(energy_consumption_data$energietraeger)
-  averages <- average_by_year_energietrager(energy_consumption_data)
-  averages <- averages[-17,]
-
-  
-  names(co2_coef) <- tolower(names(co2_coef))
-  if (unique(energy_consumption_data$gtype) == "MFH") {
-    data <- data.frame(abrechnungsjahr = data$Jahr, area = data$AreaMFH)
-  }
-  else if (unique(energy_consumption_data$gtype) == "SFH") {
-    data <- data.frame(abrechnungsjahr = data$Jahr, area = data$AreaSFH)
-  }
-  else {
-    data <- data.frame(abrechnungsjahr = data$Jahr, area = (data$AreaMFH + data$AreaSFH))
-  }
-  for (et_t in et) {
-    data[[et_t]] <- rep(NA, 16)
-  }
-  for (year in c(2002:2018)) {
-      for (et_t in et) {
-        data[data$abrechnungsjahr == year,][[et_t]] <-  
-          data[data$abrechnungsjahr == year,]$area * 1000 *
-          averages[averages$abrechnungsjahr == year,][[et_t]] *
-          co2_coef[co2_coef$jahr == year,][[et_t]]
-      }
-  }
-  
-  data
-}
-convert_area_to_co2_emissions_all(all_area,  DL_SFH, co2_coef)
-
-#################################################################################################
-
-mfh_area <- read.csv2('MFHAreas_bundeslands.csv')
-sfh_area <- read.csv2('SFHAreas_bundeslands.csv')
-all_area <- read.csv2('Areas_SFH_MFH.csv')
-co2_coef <- read.csv('Germany_CO2_coefficients.txt')
-states
-all_area
-convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef) {
-  
-  et <- unique(energy_consumption_data$energietraeger)
-  averages <- average_by_year_bundesland_energietrager(energy_consumption_data)
-  names(data) <- c('abrechnungsjahr', states)
-  names(co2_coef) <- tolower(names(co2_coef))
-  
-  data <- gather(data, bundesland, area, states, factor_key=TRUE)
-  data$area <- as.numeric(data$area)
-  for (et_t in et) {
-    data[[et_t]] <- rep(NA, (16 * 17))
-  }
-  for (year in c(2002:2018)) {
-    for (state in unique(energy_consumption_data$bundesland)) {
-      for (et_t in et) {
-        data[data$abrechnungsjahr == year & data$bundesland == state,][[et_t]] <-  
-          data[data$abrechnungsjahr == year & data$bundesland == state,]$area * 1000 *
-          averages[averages$abrechnungsjahr == year & averages$bundesland == state,][[et_t]] *
-          co2_coef[co2_coef$jahr == year,][[et_t]]
-      }
-    }
-  }
-  
-  data
-}
-convert_area_to_co2_emissions(mfh_area, DL_MFH, co2_coef)
-
-
-
-df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv")
-df$hover <- with(df, paste(state, '<br>', "Beef", beef, "Dairy", dairy, "<br>",
-                           "Fruits", total.fruits, "Veggies", total.veggies,
-                           "<br>", "Wheat", wheat, "Corn", corn))
-# give state boundaries a white border
-l <- list(color = toRGB("white"), width = 2)
-# specify some map projection/options
-g <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
-
-p <- plot_geo(df, locationmode = 'Germany-states') %>%
-  add_trace(
-    z = ~total.exports, text = ~hover, locations = ~code,
-    color = ~total.exports, colors = 'Purples'
-  ) %>%
-  colorbar(title = "Millions USD") %>%
-  layout(
-    title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)',
-    geo = g
-  )
-
+prep('MFH', 34)
 p
