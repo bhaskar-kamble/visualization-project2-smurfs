@@ -543,6 +543,7 @@ p
 
 
 ## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
+
 ```{r}
 library(plotly)
 library(tidyr)
