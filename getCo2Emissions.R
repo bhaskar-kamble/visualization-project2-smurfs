@@ -36,7 +36,6 @@ average_by_year_bundesland_energietrager <- function(data) {
   }
   
   data_wide <- spread(data_aggregated, energietraeger, verbrauch_gesamt_kwh_spez)
-  data_wide
   
   return(as.data.frame(data_wide))
 }
@@ -72,7 +71,6 @@ average_by_year_energietrager <- function(data) {
   }
   
   data_wide <- spread(data_aggregated, energietraeger, verbrauch_gesamt_kwh_spez)
-  data_wide
   
   return(as.data.frame(data_wide))
 }
@@ -86,7 +84,7 @@ convert_area_to_co2_emissions_all<- function(data, energy_consumption_data, co2_
   
   
   names(co2_coef) <- tolower(names(co2_coef))
-  if (length(unique(energy_consumption_data$gtype == 2))) {
+  if (length(unique(energy_consumption_data$gtype))  == 2) {
     data <- data.frame(abrechnungsjahr = data$Jahr, area = (data$AreaMFH + data$AreaSFH))
   }
   else if (unique(energy_consumption_data$gtype) == "MFH") {
@@ -107,8 +105,17 @@ convert_area_to_co2_emissions_all<- function(data, energy_consumption_data, co2_
     }
   }
   
+  data$erdgas <- data$erdgas / 10^2
+  data$fluessiggas <- data$fluessiggas / 10^2
+  data$heizoel <- data$heizoel / 10^2
+  data$strom <- data$strom / 10^2
+  data$holzpellets <- data$holzpellets / 10^2
+  data$waerme <- data$waerme / 10^2
+  
   data
+  
 }
+
 
 #################################################################################################
 
@@ -136,6 +143,13 @@ convert_area_to_co2_emissions<- function(data, energy_consumption_data, co2_coef
     }
   }
   
+  data$erdgas <- data$erdgas / 10^2
+  data$fluessiggas <- data$fluessiggas / 10^2
+  data$heizoel <- data$heizoel / 10^2
+  data$strom <- data$strom / 10^2
+  data$holzpellets <- data$holzpellets / 10^2
+  data$waerme <- data$waerme / 10^2
+  
   data
 }
 
@@ -162,32 +176,31 @@ get_visibility_combinations_co2 <- function() {
 get_map_data_co2 <- function() {
   enegietraeger <- unique(DL_MFH$energietraeger)
   mfh <- convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
-  mfh$mean <- apply(mfh[enegietraeger], 1, mean)
+  mfh$mean <- apply(mfh[enegietraeger], 1, sum)
   mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, mean = mfh$mean)[abrechnungsjahr == 2018,]
 
   sfh <- convert_area_to_co2_emissions(sfh_area, DL_SFH, co2_coef)
-  sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, mean)
+  sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, sum)
   sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, mean = sfh$mean)[abrechnungsjahr == 2018,]
 
   
-  all_area <- sfh_area
-  names(all_area) <- c('abrechnungsjahr', states)
-  names(mfh_area) <- c('abrechnungsjahr', states)
+  all_area_m <- sfh_area
+  names(all_area_m) <- c('abrechnungsjahr', states)
+  names(mfh_area_m) <- c('abrechnungsjahr', states)
   for (state in states) {
-    all_area[[state]] <- as.numeric(as.character(all_area[[state]])) + as.numeric(as.character(mfh_area[[state]]))
-  }
-  all_area
-  all <- convert_area_to_co2_emissions(all_area, rbind(DL_MFH, DL_SFH), co2_coef)
-  all$mean <- apply(all[enegietraeger], 1, mean)
+    all_area_m[[state]] <- as.numeric(as.character(all_area_m[[state]])) + as.numeric(as.character(mfh_area[[state]]))
+  })
+  all <- convert_area_to_co2_emissions(all_area_m, rbind(DL_MFH, DL_SFH), co2_coef)
+  all$mean <- apply(all[enegietraeger], 1, sum)
   all <- data.frame(abrechnungsjahr = all$abrechnungsjahr, bundesland = all$bundesland, mean = all$mean)[abrechnungsjahr == 2018,]
   
   
   data <-data.frame(bundesland = unique(DL_MFH$bundesland), MFH = rep(NA, 16), SFH = rep(NA, 16), ALL = rep(NA, 16))
   
   for (state in states) {
-    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean
-    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean
-    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean
+    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean / 10^2
+    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean / 10^2
+    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean / 10^2
   }
   data
 }
