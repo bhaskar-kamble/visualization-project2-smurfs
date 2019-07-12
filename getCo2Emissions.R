@@ -1,9 +1,7 @@
-
 mfh_area <- read.csv2('~/Desktop/visualization-project2-smurfs/MFHAreas_bundeslands.csv')
 sfh_area <- read.csv2('~/Desktop/visualization-project2-smurfs/SFHAreas_bundeslands.csv')
 all_area <- read.csv2('~/Desktop/visualization-project2-smurfs/Areas_SFH_MFH.csv')
 co2_coef <- read.csv('~/Desktop/visualization-project2-smurfs/Germany_CO2_coefficients.txt')
-
 
 library(tidyr)
 average_by_year_bundesland <- function(data) {
@@ -171,6 +169,7 @@ get_visibility_combinations_co2 <- function() {
 }
 
 
+
 #########################################################################################
 
 get_map_data_co2 <- function() {
@@ -184,7 +183,6 @@ get_map_data_co2 <- function() {
   sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, sum)
   sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, 
                     mean = sfh$mean)[abrechnungsjahr == 2018,]
-
   
   all_area_m <- sfh_area
   names(all_area_m) <- c('abrechnungsjahr', states)
@@ -201,9 +199,10 @@ get_map_data_co2 <- function() {
   data <-data.frame(bundesland = unique(DL_MFH$bundesland), MFH = rep(NA, 16), SFH = rep(NA, 16), ALL = rep(NA, 16))
   
   for (state in states) {
-    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean / (10^12)
-    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean / (10^12)
-    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean / (10^12)
+    data[data$bundesland == state,]$MFH <- mfh[mfh$bundesland == state,]$mean * 10^2
+    data[data$bundesland == state,]$SFH <- sfh[sfh$bundesland == state,]$mean * 10^2
+    data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean* 10^2
   }
   data
 }
+get_map_data_co2()

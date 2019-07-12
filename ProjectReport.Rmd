@@ -17,31 +17,33 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 
 # 1. Abstract
 
-The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of co2online.de, which has information on more than two million households in this time frame. (Trends in heating energy consumption).
+The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of [co2online.de](www.co2online.de), which has information on more than two million households in this time frame. The information was provided by private individuals, who gave information relating to the building's energy consumption for a year and features relating to the building (age, area, fuel type, refurbishment measures already carried out, etc.) in return for an evaluation of the building's energy efficiency and suggested refurbishment
+measures. The data are signifiicant from a political perspective, since energy consumption and 
 
-Has political significance - Klimaschutz, CO2 footprint, etc.
+
+# 2. Source of the data
+
+The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v3.Rdata` and `SFH20022018_v3.Rdata`. These are the starting point of our analysis.
 
 
-# 2. Description of the data
 
-The data gathered over the years was stored in different forms in different databases over the years. For the statistical analysis the data engineers had to extract the data from the database and was initially delivered in 10 different csv/excel files. Collecting these data into a single object, imposing consistency over the different files, and removing duplicates all formed part of the data cleaning process. This process was rather involved and is described in [this](https://github.com/bhaskar-kamble/co2online_stats) github repository. The final data are stored in Rdata objects `MFH20022018_v3.Rdata` and `SFH20022018_v3.Rdata`.
+# 3. Data extraction and description
 
-The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
-
-Do str(data) in the next section.
-
-# 3. Getting and cleaning the data
+## 3a. Getting and cleaning the data
 
 ```{r}
 
 #path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
 path_to_file <- "~/Desktop/visualization-project2-smurfs/"
+
 source(paste0(path_to_file , "getGermanyData.R"))
 source(paste0(path_to_file , "cleanData.R"))
 source(paste0(path_to_file , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "getBundeslandfromLK.R"))
 source(paste0(path_to_file , "getSpecificConsumptionByYear.R"))
 source(paste0(path_to_file , "getConsumptionPerEnergieTraeger.R"))
+source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
+source(paste0(path_to_file , "getCo2Emissions.R"))
 
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
@@ -56,35 +58,41 @@ DL_MFH <- getBundeslandfromCode(DL_MFH)
 DL_SFH <- getBundeslandfromCode(DL_SFH)
 DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
-#unique(DL_MFH$bundesland)
-#unique(DL_MFH$bundesland)
-
-source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
-source(paste0(path_to_file , "getCo2Emissions.R"))
 ```
 
+
+## 3b. Description of the data 
+
+```{r}
+str(DL_MFH)
+```
+
+Thus we see that there are `r nrow(DL_MFH)` observations for multifamily houses. The `?nergietraeger` is the source of fuel used for heating the building. The other variables of interest are the year of construction `gebaeude_baujahr`, the year in which the energy was measured (`abrechnungsjahr`), and the area of the building (`genaeude_nutzflaeche`).
+
+```{r}
+str(DL_SFH)
+```
+
+For 1-2 family houses there are `r nrow(DL_SFH)` observations.
+
 # 4. Energy consumption trends across Germany
+
+In this section we will analyze how the specific energy consumption (energy consumed per unit area) across Germany changes over the years.
+
+The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
+
 
 ## 4a. Specific Energy Consumtion trends
 
 ```{r}
-#library(mosaic)
-#detach("package:mosaic", unload=TRUE)
 MFH_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "MFH")
 SFH_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "SFH")
 ALL_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "ALL")
 ```
 
-```{r}
-require(ggplot2)
-ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
-)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
-)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
-)+scale_color_discrete(name=" ",labels=c("ALL","MFH","SFH"))+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
-```
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 1: Specific energy consumption for Germany for multifamily (MFH), 1-2 family (SFH), and both (MFH+SFH combined) buildings."}
 require(ggplot2)
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
@@ -100,10 +108,26 @@ ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verb
 ```
 
 
-![Temperatures in Germany from 1881 - 2018. Source: wikipedia](1000px-Zeitreihe_der_Temperaturen_in_Deutschland.svg.png)
+From the above picture we can infer that the specific energy consumption for 1-2 family buildings is consistently higher than that of multifamily buildings, although the difference seems to be reducing in recent years. Overall the specific energy consumption shows a consistent decrease with the years for both types of buildings. This can be attributed to more stringent government norms which buildings constructed in recent years have to follow, making them more efficient. The other factor is the carrying out of refurbishment measures in old buildings resulting in an increase in their energy efficieny. A third factor resulting in the decrease in energy consumption is the climate. If we plot the winter temperatures from 2002 to 2018 in Germany, we get the following plot
+
+```{r,fig.cap="\\label{fig:figs}Fig. 2: Winter temperatures in Germany from 2002-2018 (source: https://de.wikipedia.org/wiki/Zeitreihe_der_Lufttemperatur_in_Deutschland#2001_bis_2010)"}
+germany_winter_temp <- read.table(paste0(path_to_file,"GermanyWinterTemperatures.txt"))
+names(germany_winter_temp) <- c("Year","Temperature")
+ggplot(data=germany_winter_temp,aes(x=Year,y=Temperature))+geom_point()+geom_smooth(method="lm",se=FALSE)
+```
 
 
-```{r}
+The plot shows an overall increase when one considers the linear trend, and hence has definitely contributed to the decrease in energy consumption. To what extent the decrease in energy consumption is caused by the aforementioned three factors is an interesting question which needs further investigation. One possible solution is to do a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably). Due to time constraints we have not followed that option here.
+
+In Fig. 1, there is a sharp increase in energy consumption for the year 2010. This corresponds to the extremely cold winter of the year 2010, as seen in Fig. 2, or in Fig. 3.
+
+
+![Fig. 3: Temperatures in Germany from 1881 - 2018. Source: wikipedia](1000px-Zeitreihe_der_Temperaturen_in_Deutschland.svg.png)
+
+In the next picture we plot the slope of the linear trend for the specific energy consumption. As can be seen, the slope for 1-2 family houses is indeed greater than that for multifamily houses (in terms of absolute value).
+
+
+```{r,fig.cap="\\label{fig:figs}Fig. 4: Slopes for the linear trend of specific energy consumption for Germany."}
 lm_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = MFH_spez_verbrauch)
 lm_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = SFH_spez_verbrauch)
 lm_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = ALL_spez_verbrauch)
@@ -119,392 +143,8 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 
 
 
-# 5. Energy consumption trends across the 16 Federal states
 
-```{r}
-#now subset bundesland and do the calculations for specific consumption
-# (1) MFH case #calculate the specific consumption and the slope
-
-states <- sort(unique(DL_MFH$bundesland))
-bundlands_SV_mfh <- list()
-bundlands_SV_sfh <- list()
-bundlands_SV_all <- list()
-for (s in states) {
-  #For MFH:
-  #print(s)
-  bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
-  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
-  #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
-  bundlands_SV_mfh[[s]] <- specific_con
-  #For SFH:
-  bund_data_sfh <- DL_SFH[DL_SFH$bundesland == s  ,  ]
-  specific_con <- getSpecificConsumptionByYear(mfh=NULL , sfh=bund_data_sfh , gtype="SFH")
-  bundlands_SV_sfh[[s]] <- specific_con
-  #For both:
-  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=bund_data_sfh , gtype="ALL")
-  bundlands_SV_all[[s]] <- specific_con
-}
-
-#collect into single data frame - these will be used for plotting in plotly
-bundSV_mfh_df <- data.frame(abrechnungsjahr=2002:2018)
-bundSV_sfh_df <- data.frame(abrechnungsjahr=2002:2018)
-bundSV_all_df <- data.frame(abrechnungsjahr=2002:2018)
-for (s in names(bundlands_SV_mfh)) {
-  bundSV_mfh_df[[s]] <- bundlands_SV_mfh[[s]]$spz_verbrauch
-  bundSV_sfh_df[[s]] <- bundlands_SV_sfh[[s]]$spz_verbrauch
-  bundSV_all_df[[s]] <- bundlands_SV_all[[s]]$spz_verbrauch
-}
-```
-
-
-
-
-
-## 5a. Specific Energy Consumption for MFH for the federal states
-
-```{r}
-get_VC <- function() {
-  visibility_combinations <- list()
-  i = 1
-  for (state in states) {
-    to = 16
-    vis <- rep(F, to)
-    vis[i] <- TRUE
-    visibility_combinations[[i]] <- list(method = "restyle",
-                                         args = list("visible", as.list(vis)),
-                                         label = state)
-    i = i + 1
-  }
-  return(visibility_combinations)
-}
-```
-
-
-```{r}
-library(plotly)
-p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
-#p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>% add_markers(y = ~get(states[1]), name = " ",marker=list(color="black"))
-#for (i in 2:16) {
-#  p <- p %>% add_markers(y = ~get(states[i]), name = " " , marker=list(color="black"), visible = F)
-#}
-
-p <- p %>% layout(showlegend=FALSE,
-  title = "Multifamily Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,150),tickvals=list(0,20,40,60,80,100,120,140)),
-  updatemenus = list(
-    list(
-      buttons = get_VC()
-    )
-  )
-)
-```
-
-```{r,fig.cap="\\label{fig:figs}Fig. 7: Heat map"}
-p
-```
-
-
-
-```{r}
-abrechnungsjahr = 2002:2018
-lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
-lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
-lm3 <- lm(as.matrix(bundSV_mfh_df[states[3]]) ~ abrechnungsjahr)
-lm4 <- lm(as.matrix(bundSV_mfh_df[states[4]]) ~ abrechnungsjahr)
-lm5 <- lm(as.matrix(bundSV_mfh_df[states[5]]) ~ abrechnungsjahr)
-lm6 <- lm(as.matrix(bundSV_mfh_df[states[6]]) ~ abrechnungsjahr)
-lm7 <- lm(as.matrix(bundSV_mfh_df[states[7]]) ~ abrechnungsjahr)
-lm8 <- lm(as.matrix(bundSV_mfh_df[states[8]]) ~ abrechnungsjahr)
-lm9 <- lm(as.matrix(bundSV_mfh_df[states[9]]) ~ abrechnungsjahr)
-lm10 <- lm(as.matrix(bundSV_mfh_df[states[10]]) ~ abrechnungsjahr)
-lm11 <- lm(as.matrix(bundSV_mfh_df[states[11]]) ~ abrechnungsjahr)
-lm12 <- lm(as.matrix(bundSV_mfh_df[states[12]]) ~ abrechnungsjahr)
-lm13 <- lm(as.matrix(bundSV_mfh_df[states[13]]) ~ abrechnungsjahr)
-lm14 <- lm(as.matrix(bundSV_mfh_df[states[14]]) ~ abrechnungsjahr)
-lm15 <- lm(as.matrix(bundSV_mfh_df[states[15]]) ~ abrechnungsjahr)
-lm16 <- lm(as.matrix(bundSV_mfh_df[states[16]]) ~ abrechnungsjahr)
-slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
-abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
-#slope <- sort(slope)
-#states <- sort(unique(DL_MFH$bundesland))
-mydata <-data.frame(slope, states)
-mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
-p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
-p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
-```
-
-```{r}
-slopes_data <- data.frame(bundesland=states)
-slope_values_mfh <- NULL
-slope_values_sfh <- NULL
-slope_values_all <- NULL
-for (s in states) {
-  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
-  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
-  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
-  
-  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
-  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
-  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
-}
-slopes_data$MFH <- slope_values_mfh 
-slopes_data$SFH <- slope_values_sfh
-slopes_data$ALL <- slope_values_all
-
-library(sf)
-library(dplyr)
-library(ggplot2)
-DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
-#DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
-#                 stringsAsFactors = FALSE)
-```
-
-```{r}
-library(tmap)
-library(tmaptools)
-DL_map$MFH <- slopes_data$MFH
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("MFH",
-                               id="NAME_1",
-                               popup.vars=c("MFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-
-
-## 5b. Specific Energy Consumption for 1-2 Family Houses for the federal states
-
-```{r}
-p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
-p <- p %>% layout(showlegend=FALSE,
-  title = "1-2 Family Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,180),tickvals=list(0,20,40,60,80,100,120,140,160,180)),
-  updatemenus = list(
-    list(
-      buttons = get_VC()
-    )
-  )
-)
-
-p
-```
-
-
-
-```{r}
-lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
-lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
-lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
-lm4 <- lm(as.matrix(bundSV_sfh_df[states[4]]) ~ abrechnungsjahr)
-lm5 <- lm(as.matrix(bundSV_sfh_df[states[5]]) ~ abrechnungsjahr)
-lm6 <- lm(as.matrix(bundSV_sfh_df[states[6]]) ~ abrechnungsjahr)
-lm7 <- lm(as.matrix(bundSV_sfh_df[states[7]]) ~ abrechnungsjahr)
-lm8 <- lm(as.matrix(bundSV_sfh_df[states[8]]) ~ abrechnungsjahr)
-lm9 <- lm(as.matrix(bundSV_sfh_df[states[9]]) ~ abrechnungsjahr)
-lm10 <- lm(as.matrix(bundSV_sfh_df[states[10]]) ~ abrechnungsjahr)
-lm11 <- lm(as.matrix(bundSV_sfh_df[states[11]]) ~ abrechnungsjahr)
-lm12 <- lm(as.matrix(bundSV_sfh_df[states[12]]) ~ abrechnungsjahr)
-lm13 <- lm(as.matrix(bundSV_sfh_df[states[13]]) ~ abrechnungsjahr)
-lm14 <- lm(as.matrix(bundSV_sfh_df[states[14]]) ~ abrechnungsjahr)
-lm15 <- lm(as.matrix(bundSV_sfh_df[states[15]]) ~ abrechnungsjahr)
-lm16 <- lm(as.matrix(bundSV_sfh_df[states[16]]) ~ abrechnungsjahr)
-library(ggplot2)
-slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
-abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
-#slope <- sort(slope)
-#states <- sort(unique(DL_MFH$bundesland))
-mydata <-data.frame(slope, states)
-mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
-p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
-p +labs(title="SFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
-```
-
-
-```{r}
-DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("SFH",
-                               id="NAME_1",
-                               popup.vars=c("SFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-
-## 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
-
-
-
-```{r}
-p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
-  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
-  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
-  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-#https://stackoverflow.com/questions/34093169/horizontal-vertical-line-in-plotly
-p <- p %>% layout(showlegend=FALSE,
-  title = "Multi and 1-2 Family Houses",
-  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
-  yaxis = list(title = "kWh/m2",range=c(0,160),tickvals=list(0,20,40,60,80,100,120,140,160)),
-  shapes=list(type='line', x0= 2001, x1= 2001, y0=0, y1=160, line=list(width=1)),
-  updatemenus = list(
-    list(
-      buttons = get_VC()
-    )
-  )
-)
-
-p
-```
-
-```{r}
-lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
-lm2 <- lm(as.matrix(bundSV_all_df[states[2]]) ~ abrechnungsjahr)
-lm3 <- lm(as.matrix(bundSV_all_df[states[3]]) ~ abrechnungsjahr)
-lm4 <- lm(as.matrix(bundSV_all_df[states[4]]) ~ abrechnungsjahr)
-lm5 <- lm(as.matrix(bundSV_all_df[states[5]]) ~ abrechnungsjahr)
-lm6 <- lm(as.matrix(bundSV_all_df[states[6]]) ~ abrechnungsjahr)
-lm7 <- lm(as.matrix(bundSV_all_df[states[7]]) ~ abrechnungsjahr)
-lm8 <- lm(as.matrix(bundSV_all_df[states[8]]) ~ abrechnungsjahr)
-lm9 <- lm(as.matrix(bundSV_all_df[states[9]]) ~ abrechnungsjahr)
-lm10 <- lm(as.matrix(bundSV_all_df[states[10]]) ~ abrechnungsjahr)
-lm11 <- lm(as.matrix(bundSV_all_df[states[11]]) ~ abrechnungsjahr)
-lm12 <- lm(as.matrix(bundSV_all_df[states[12]]) ~ abrechnungsjahr)
-lm13 <- lm(as.matrix(bundSV_all_df[states[13]]) ~ abrechnungsjahr)
-lm14 <- lm(as.matrix(bundSV_all_df[states[14]]) ~ abrechnungsjahr)
-lm15 <- lm(as.matrix(bundSV_all_df[states[15]]) ~ abrechnungsjahr)
-lm16 <- lm(as.matrix(bundSV_all_df[states[16]]) ~ abrechnungsjahr)
-slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
-abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
-#slope <- sort(slope)
-#states <- sort(unique(DL_MFH$bundesland))
-mydata <-data.frame(slope, states)
-mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
-p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
-p +labs(title="ALL",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
-```
-
-
-
-```{r}
-DL_map$ALL <- slopes_data$ALL #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("ALL",
-                               id="NAME_1",
-                               popup.vars=c("ALL"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-
-```{r}
-library(plotly)
-
-tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for MFH',
-    xaxis = list(range = 2012:2018))
-
-
-p
-```
-
-```{r}
-library(plotly)
-
-tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for SFH',
-    xaxis = list(range = 2012:2018))
-
-
-p
-```
-
-```{r}
-library(plotly)
-
-bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
-tmp <- aggregate(bind[c(-1, -2)], 
-                 by=list(bind$bundesland, bind$abrechnungsjahr), FUN =mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for MFH & SFH',
-    xaxis = list(range = 2012:2018))
-
-
-p
-```
-
-
-
-
+# 5. CO2 emissions across Germany
 
 
 ```{r}
@@ -554,6 +194,7 @@ get_relative_frequencies_interactive <- function(data, title) {
   return(p)
 }
 ```
+
 
 ```{r}
 library(plotly)
@@ -727,28 +368,477 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 ```
 </div>
 
+# 5a Energy consumption per fuel
+
 ```{r}
 get_relative_frequencies_interactive_all()
 ```
+First let's point out that the heizoel is the most non eco-freindly fuel.
+Waerme is the most friendly one and the others come after that one.
+In this graph we can see that in general over the years erdgass and heizoel were mostly used,
+then comes strom, and somewhere at the beginning of 2008 (although they were sold even before that) more people started to use 
+holzpellets which have also very low influence in the co2 emissions.
 
+In the multi-family houses we can see a drop down on the heizoel and an increase in the waerme,
+which is not the case for single-family houses where the heizoel is kind of constant, but strom and holzpellets are more used since year 2009.
+
+# 5a CO2 Emissons in all Gemany
 ```{r}
 get_co2_emissions_interactive_all()
 ```
+When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany,
+except that the co2 emissions from the heizoel and erdgass change slightly in every, we could even say that there's a negative correlation between them.
+
+For the MFH case we can see that the heizoel co2 emission starts to decrease over the years, and the co2 emission that come from the erdgass starts to increase.
+There's a strong negative correlation between them. On the other hand when we take a look at the SFH we can see that the co2 emissions from the heizoel are the highest
+and they still tend to increase.
+
+
+  # 6. Energy consumption trends across the 16 Federal states
+
+In this section we consider trends in the specific energy consumption for each of the 16 federal states in Germany.
+
+## 6a. Creating the dataframes
+
+First we create data frames for `MFH`, `SFH` and `ALL` types of buildings.
+
+```{r}
+states <- sort(unique(DL_MFH$bundesland))
+bundlands_SV_mfh <- list()
+bundlands_SV_sfh <- list()
+bundlands_SV_all <- list()
+for (s in states) {
+  bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
+  #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
+  bundlands_SV_mfh[[s]] <- specific_con
+  #For SFH:
+  bund_data_sfh <- DL_SFH[DL_SFH$bundesland == s  ,  ]
+  specific_con <- getSpecificConsumptionByYear(mfh=NULL , sfh=bund_data_sfh , gtype="SFH")
+  bundlands_SV_sfh[[s]] <- specific_con
+  #For both:
+  specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=bund_data_sfh , gtype="ALL")
+  bundlands_SV_all[[s]] <- specific_con
+}
+
+#collect into single data frame - these will be used for plotting in plotly
+bundSV_mfh_df <- data.frame(abrechnungsjahr=2002:2018)
+bundSV_sfh_df <- data.frame(abrechnungsjahr=2002:2018)
+bundSV_all_df <- data.frame(abrechnungsjahr=2002:2018)
+for (s in names(bundlands_SV_mfh)) {
+  bundSV_mfh_df[[s]] <- bundlands_SV_mfh[[s]]$spz_verbrauch
+  bundSV_sfh_df[[s]] <- bundlands_SV_sfh[[s]]$spz_verbrauch
+  bundSV_all_df[[s]] <- bundlands_SV_all[[s]]$spz_verbrauch
+}
+```
+
+As an example, the dataframe `bundSV_mfh` looks as follows:
+
+```{r}
+bundSV_mfh_df
+```
+
+In the next sections we explore several visualization techniques for the above data.
+
+## 6b. Specific Energy Consumption for MFH for the federal states
+
+The next plot shows the specific energy consumption for the 16 federal states in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
+
+```{r}
+get_VC <- function() {
+  visibility_combinations <- list()
+  i = 1
+  for (state in states) {
+    to = 16
+    vis <- rep(F, to)
+    vis[i] <- TRUE
+    visibility_combinations[[i]] <- list(method = "restyle",
+                                         args = list("visible", as.list(vis)),
+                                         label = state)
+    i = i + 1
+  }
+  return(visibility_combinations)
+}
+```
+
+
+```{r}
+library(plotly)
+p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+
+#p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>% add_markers(y = ~get(states[1]), name = " ",marker=list(color="black"))
+#for (i in 2:16) {
+#  p <- p %>% add_markers(y = ~get(states[i]), name = " " , marker=list(color="black"), visible = F)
+#}
+
+p <- p %>% layout(showlegend=FALSE,
+  title = "Multifamily Houses",
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,150),tickvals=list(0,20,40,60,80,100,120,140)),
+  updatemenus = list(
+    list(
+      buttons = get_VC()
+    )
+  )
+)
+```
+
+```{r,fig.cap="\\label{fig:figs}Fig. 5: Interactive plot for the specific energy consumption for the 16 federal states from 2002-2018."}
+p
+```
+
+
+```{r,fig.cap="\\label{fig:figs}Fig. 6: Heat map of the specific energy consumption for the year and the state"}
+library(plotly)
+
+tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+
+
+
+```{r}
+abrechnungsjahr = 2002:2018
+lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_mfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_mfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_mfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_mfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_mfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_mfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_mfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_mfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_mfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_mfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_mfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_mfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_mfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_mfh_df[states[16]]) ~ abrechnungsjahr)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
+
+```{r}
+slopes_data <- data.frame(bundesland=states)
+slope_values_mfh <- NULL
+slope_values_sfh <- NULL
+slope_values_all <- NULL
+for (s in states) {
+  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
+  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
+  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
+  
+  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
+  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
+  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
+}
+slopes_data$MFH <- slope_values_mfh 
+slopes_data$SFH <- slope_values_sfh
+slopes_data$ALL <- slope_values_all
+
+library(sf)
+library(dplyr)
+library(ggplot2)
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+#DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
+#                 stringsAsFactors = FALSE)
+```
+
+```{r}
+library(tmap)
+library(tmaptools)
+DL_map$MFH <- slopes_data$MFH
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("MFH",
+                               id="NAME_1",
+                               popup.vars=c("MFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 6c. Specific Energy Consumption for 1-2 Family Houses for the federal states
+
+```{r}
+p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+
+p <- p %>% layout(showlegend=FALSE,
+  title = "1-2 Family Houses",
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,180),tickvals=list(0,20,40,60,80,100,120,140,160,180)),
+  updatemenus = list(
+    list(
+      buttons = get_VC()
+    )
+  )
+)
+
+p
+```
+
+
+```{r}
+library(plotly)
+
+tmp <- aggregate(DL_SFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_SFH$bundesland, DL_SFH$abrechnungsjahr), FUN = mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for SFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+
+
+
+```{r}
+lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_sfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_sfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_sfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_sfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_sfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_sfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_sfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_sfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_sfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_sfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_sfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_sfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_sfh_df[states[16]]) ~ abrechnungsjahr)
+library(ggplot2)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="SFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
+
+
+```{r}
+DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("SFH",
+                               id="NAME_1",
+                               popup.vars=c("SFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+
+## 6d. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
+
+
+
+```{r}
+p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
+  add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
+  add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[3]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[4]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[5]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[6]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[7]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[8]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[9]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[10]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[11]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[12]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[13]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
+  add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
+#https://stackoverflow.com/questions/34093169/horizontal-vertical-line-in-plotly
+p <- p %>% layout(showlegend=FALSE,
+  title = "Multi and 1-2 Family Houses",
+  xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
+  yaxis = list(title = "kWh/m2",range=c(0,160),tickvals=list(0,20,40,60,80,100,120,140,160)),
+  shapes=list(type='line', x0= 2001, x1= 2001, y0=0, y1=160, line=list(width=1)),
+  updatemenus = list(
+    list(
+      buttons = get_VC()
+    )
+  )
+)
+
+p
+```
+
+```{r}
+library(plotly)
+
+bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
+tmp <- aggregate(bind[c(-1, -2)], 
+                 by=list(bind$bundesland, bind$abrechnungsjahr), FUN =mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH & SFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+
+
+```{r}
+lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_all_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_all_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_all_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_all_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_all_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_all_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_all_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_all_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_all_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_all_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_all_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_all_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_all_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_all_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_all_df[states[16]]) ~ abrechnungsjahr)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="ALL",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
+
+
+
+```{r}
+DL_map$ALL <- slopes_data$ALL #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("ALL",
+                               id="NAME_1",
+                               popup.vars=c("ALL"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 7. CO2 emission across the 16 federal states
+
+# 7a. Procentual consumption and CO2 Emissions by Bundesland (MFH & SFH)
 
 ```{r}
 get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Procentual consumption per fuel by bundesland')
 ```
 
+When we see these trends by bundesland we can see that in general in Macklenburg-Vorpommern people tend to use heizoel. This numbers even increase over the years
+but also, lately the strom and the holzpellets became an option to the people. We can see the same for Niedersachsen Nordrhein-Westfalen, Hamburg, Hessen.
+In other bundeslaender however, like Berlin, Saarland there's an increased number of people who use strom and the usage of heizoel drops down. This data will be better explained by the lines below.
+
 ```{r}
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, rbind(DL_SFH, DL_MFH), co2_coef, 'SFH & MFH - Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, rbind(DL_SFH, DL_MFH), co2_coef, 'SFH & MFH - CO2 Emissions by Bundesland')
 ```
+
+We can see in the plot below that there was a period from 2009-2015 where people were using strom to heat their homes, thus there was a large co2 emission from there. First we thought that this was because the prices whent down,
+but we checked that information and it wasn't orrect. Same as before, when the erdgass prices and the heizoel have negative correlation. We can also conclude that there's drop in the heizoel consumption lately.
+
+
+# 7b. Procentual consumption and CO2 Emissions by Bundesland (MFH)
 
 ```{r}
 get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per fuel by bundesland')
 ```
+When we make comparison between the MFH and the SFH consumptions by year and bundesland we can see that in the MFH case especially in Hessen, Hamburg there's stil a large percentage of people who use heizoel, but and interesing state is Sachsen-Anhalt the largest percentage of consumption goes to  erdgass, there's a drop in the heizoel consumption and increase in the holzpellets
 
 ```{r}
 library(plotly)
@@ -756,10 +846,15 @@ library(tidyr)
 
 get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland (Megatonnes)')
 ```
+We can see the similar results here, especially for Hamburg, more specifically until 2014 there was a large co2 emission from waerme. Lately they tend to use heizoel. In Badem-Wuertemberg the started to use Waerme more and significanlty reduced the CO2 emissions from heizoel
 
+
+# 7c. Procentual consumption and CO2 Emissions by Bundesland (SFH)
 ```{r}
 get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per fuel by bundesland')
 ```
+In the case of SFH, we can see that Baden-Wuerttemberg was the leader in heizoel consumption, This trend however tends to drop down. Also in Mecklenburg-Vorprommern people still tend to use heizoel.
+They also started using strom lately. 
 
 ```{r}
 library(plotly)
@@ -767,8 +862,14 @@ library(tidyr)
 
 get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland  (Megatonnes)')
 ```
+Regarding the co2 emission, an interesing state is Sachsen-Anhalt where we can see that they don't use heizoel and erdgass lately, but they tend to use strom.
 
 
+
+
+# 7d. Eco-friendliness in 2018 
+
+In this subsection we can see how eco-friendly the states are now, in all Germany, for both MFH, then MFH and SFH separately. We get these numbers by a sequence of compuatations and specific co2 coefficients so that every fuel i s kind of weighted when contirbuting to the co2 emissions.
 ```{r}
 library(tmap)
 library(tmaptools)
@@ -810,8 +911,6 @@ tm_shape(DL_map) + tm_polygons("MFH",
 library(tmap)
 library(tmaptools)
 
-DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
-
 DL_map$SFH <- map_data$SFH
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("SFH",
@@ -823,7 +922,14 @@ tm_shape(DL_map) + tm_polygons("SFH",
                                #legend.reverse=TRUE - Gives WRONG info!
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
+From all three plots we can conclude that Hessen is the worst bundesland in terms of eco-friendliness, next are Nordrhein-Westfalen, Rheinland-Pfalz and Brandenburg. It's interesting to notice that in Brandenburg the MFH houses use better fuels than the SFH. Another interesting thing is that Bayern is very eco-friendly and has less CO2 emissions than Hessen even though it has twice (12,997,204) the Inhabitants of Hessen.
 
+
+# 8. SOM interpretations of the data
+
+In this section we're goint to take a look in other parameters that contribute to the energy consumption in all german districts. We're taking into account latitude, longitude, gebaeude_baujahr, and, gebaeude_nutzfleche
+
+# 8.a SOM interpretations of MFH
 
 ```{r}
 library(plotly)
@@ -831,6 +937,9 @@ library(tidyr)
 plot_som(DL_MFH)
 ```
 
+
+
+# 8.a SOM interpretations of SFH
 ```{r}
 library(plotly)
 library(tidyr)
