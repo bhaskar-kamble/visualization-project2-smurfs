@@ -173,7 +173,16 @@ get_visibility_combinations_co2 <- function() {
 
 #########################################################################################
 
+<<<<<<< HEAD
 get_map_data_co2 <- function(year) {
+=======
+#get_map_data_co2() {
+#  enegietraeger <- unique(DL_MFH$energietraeger)
+#  convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
+#}
+
+get_map_data_co2 <- function() {
+>>>>>>> a720390a950e1cf14be44f8f88afec3387a3e506
   enegietraeger <- unique(DL_MFH$energietraeger)
   mfh <- convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
   mfh$mean <- apply(mfh[enegietraeger], 1, sum)
@@ -206,4 +215,10 @@ get_map_data_co2 <- function(year) {
     data[data$bundesland == state,]$ALL <- all[all$bundesland == state,]$mean / 10^2
   }
   data
+<<<<<<< HEAD
 }
+=======
+}
+
+get_map_data_co2()
+>>>>>>> a720390a950e1cf14be44f8f88afec3387a3e506

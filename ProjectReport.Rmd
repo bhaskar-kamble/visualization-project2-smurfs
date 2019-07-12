@@ -33,8 +33,8 @@ Do str(data) in the next section.
 # 3. Getting and cleaning the data
 
 ```{r}
-#path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
-path_to_file <- "./"
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
+#path_to_file <- "./"
 source(paste0(path_to_file , "getGermanyData.R"))
 source(paste0(path_to_file , "cleanData.R"))
 source(paste0(path_to_file , "getBundeslandfromCode.R"))
@@ -118,10 +118,7 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 
 
 
-
-
-
-# 4. Energy consumption trends across the 16 Federal states
+# 5. Energy consumption trends across the 16 Federal states
 
 ```{r}
 #now subset bundesland and do the calculations for specific consumption
@@ -133,7 +130,7 @@ bundlands_SV_sfh <- list()
 bundlands_SV_all <- list()
 for (s in states) {
   #For MFH:
-  print(s)
+  #print(s)
   bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
   specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
   #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
@@ -217,7 +214,9 @@ p <- p %>% layout(showlegend=FALSE,
     )
   )
 )
+```
 
+```{r,fig.cap="\\label{fig:figs}Fig. 7: Heat map"}
 p
 ```
 
@@ -503,14 +502,9 @@ p
 ```
 
 
-## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
-
-
-## 5e. Interactive maps for federal states for 1-2 family houses
 
 
 
-## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
 
 ```{r}
 library(plotly)
