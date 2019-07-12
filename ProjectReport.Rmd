@@ -136,9 +136,7 @@ i <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=e
   geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
 
-#grid.arrange(i,ncol=2)
-
-#absolute_freq(DL_SFH)
+grid.arrange(i,ncol=2)
 i
 ```
 
@@ -774,44 +772,42 @@ get_relative_frequencies_interactive_all()
 get_co2_emissions_interactive_all()
 ```
 
-
 ```{r}
-get_relative_frequencies_interactive(DL_MFH, 'Procentual consumption per fuel by bundesland')
+get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Procentual consumption per fuel by bundesland')
 ```
 
 ```{r}
 library(plotly)
 library(tidyr)
 
-get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'Co2 Emissions by Bundesland')
+get_co2_emissions_interactive(mfh_area, rbind(DL_SFH, DL_MFH), co2_coef, 'SFH & MFH - Co2 Emissions by Bundesland')
+```
+
+```{r}
+get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per fuel by bundesland')
 ```
 
 ```{r}
 library(plotly)
 library(tidyr)
 
-#get_absolute_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - absolute freq')
-```
-```{r}
-library(plotly)
-library(tidyr)
-
-get_relative_frequencies_interactive(DL_SFH, 'Energie Traeger SFH - relative freq')
+get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland')
 ```
 
 ```{r}
-library(plotly)
-library(tidyr)
-
-#get_absolute_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - absolute freq')
+get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per fuel by bundesland')
 ```
 
 ```{r}
 library(plotly)
 library(tidyr)
 
-get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'Energie Traeger SFH and MFH - relative freq')
+get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland')
 ```
+
+
+
+
 
 
 ```{r}
