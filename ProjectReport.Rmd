@@ -212,6 +212,60 @@ ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype)
 
 When we use interaction between the year and the building type we get a better fit to the data.
 
+```{r}
+## effect of temperature on MFH
+fit3=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = MFH_spez_verbrauch)
+summary(fit3)
+
+# for 1st
+equation1=function(x){coef(fit3)[2]*x+coef(fit3)[1]}
+
+# for 2nd
+equation2=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]}
+
+# for 3rd
+equation3=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]+coef(fit3)[4]}
+
+# for 4th
+equation4=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]+coef(fit3)[4]+coef(fit3)[5]}
+
+ggplot(MFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+geom_point()+
+        stat_function(fun=equation1,geom="line",color=scales::hue_pal()(4)[1])+
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(4)[2])+
+        stat_function(fun=equation3,geom="line",color=scales::hue_pal()(4)[3])+
+        stat_function(fun=equation4,geom="line",color=scales::hue_pal()(4)[4])+
+        labs(title="EFFECT OF TEMPERTURE IN MFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+```
+
+
+```{r}
+# effect of temperature on SFH
+fit4=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = SFH_spez_verbrauch)
+summary(fit4)
+
+# for 1st
+equation1=function(x){coef(fit4)[2]*x+coef(fit4)[1]}
+
+# for 2nd
+equation2=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]}
+
+# for 3rd
+equation3=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]+coef(fit4)[4]}
+
+# for 4th
+equation4=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]+coef(fit3)[4]+coef(fit4)[5]}
+
+ggplot(SFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+geom_point()+
+        stat_function(fun=equation1,geom="line",color=scales::hue_pal()(4)[1])+
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(4)[2])+
+        stat_function(fun=equation3,geom="line",color=scales::hue_pal()(4)[3])+
+        stat_function(fun=equation4,geom="line",color=scales::hue_pal()(4)[4])+
+        labs(title="EFFECT OF TEMPERTURE IN MFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+```
+
+
+
+
 # 5. CO2 emissions across Germany
 
 
@@ -315,7 +369,7 @@ p <- plot_ly(type = 'bar', colors = "Blues")
       colorway = c('#e8288a','#1f9d75', '#e2ab07', '#756eb2', '#d95e00', '#68a61e'))
   
   p <- p %>% layout(
-    title = 'Procentual consumption per fuel',
+    title = 'Percentual consumption per fuel',
     xaxis = list(title = "Year", range = c(2001, 2019)),
     yaxis = list(title = "Value"),
     barmode ='stack',
@@ -447,7 +501,9 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 
 # 5a Energy consumption per fuel
 
-```{r,fig.cap="\\label{fig:figs}Fig. 5: xyz"}
+The following figure shows the proportions of energy produced by the different fuels.
+
+```{r,fig.cap="\\label{fig:figs}Fig. 5"}
 get_relative_frequencies_interactive_all()
 ```
 First let's point out that the heizoel is the most non eco-freindly fuel.
@@ -459,8 +515,11 @@ holzpellets which have also very low influence in the co2 emissions.
 In the multi-family houses we can see a drop down on the heizoel and an increase in the waerme,
 which is not the case for single-family houses where the heizoel is kind of constant, but strom and holzpellets are more used since year 2009.
 
-# 5b CO2 Emissons in all Gemany
-```{r,fig.cap="\\label{fig:figs}Fig. 6: xyz"}
+# 5b CO2 Emissons in all Germany
+
+The following code shows the co2 emitted in Germany.
+
+```{r,fig.cap="\\label{fig:figs}Fig. 6"}
 get_co2_emissions_interactive_all()
 ```
 When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany,
@@ -896,10 +955,10 @@ tm_shape(DL_map) + tm_polygons("ALL",
 
 # 7. CO2 emission across the 16 federal states
 
-# 7a. Procentual consumption and CO2 Emissions by Bundesland (MFH & SFH)
+# 7a. Percentual consumption and CO2 Emissions by Bundesland (MFH & SFH)
 
 ```{r}
-get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Procentual consumption per fuel by bundesland')
+get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Percentual consumption per fuel by bundesland')
 ```
 
 When we see these trends by bundesland we can see that in general in Macklenburg-Vorpommern people tend to use heizoel. This numbers even increase over the years
@@ -917,10 +976,10 @@ We can see in the plot below that there was a period from 2009-2015 where people
 but we checked that information and it wasn't orrect. Same as before, when the erdgass prices and the heizoel have negative correlation. We can also conclude that there's drop in the heizoel consumption lately.
 
 
-# 7b. Procentual consumption and CO2 Emissions by Bundesland (MFH)
+# 7b. Percentual consumption and CO2 Emissions by Bundesland (MFH)
 
 ```{r}
-get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per fuel by bundesland')
+get_relative_frequencies_interactive(DL_MFH, 'MFH - Percentual consumption per fuel by bundesland')
 ```
 When we make comparison between the MFH and the SFH consumptions by year and bundesland we can see that in the MFH case especially in Hessen, Hamburg there's stil a large percentage of people who use heizoel, but and interesing state is Sachsen-Anhalt the largest percentage of consumption goes to  erdgass, there's a drop in the heizoel consumption and increase in the holzpellets
 
@@ -933,9 +992,9 @@ get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions b
 We can see the similar results here, especially for Hamburg, more specifically until 2014 there was a large co2 emission from waerme. Lately they tend to use heizoel. In Badem-Wuertemberg the started to use Waerme more and significanlty reduced the CO2 emissions from heizoel
 
 
-# 7c. Procentual consumption and CO2 Emissions by Bundesland (SFH)
+# 7c. Percentual consumption and CO2 Emissions by Bundesland (SFH)
 ```{r}
-get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per fuel by bundesland')
+get_relative_frequencies_interactive(DL_SFH, 'SFH - Percentual consumption per fuel by bundesland')
 ```
 In the case of SFH, we can see that Baden-Wuerttemberg was the leader in heizoel consumption, This trend however tends to drop down. Also in Mecklenburg-Vorprommern people still tend to use heizoel.
 They also started using strom lately. 
@@ -1030,3 +1089,10 @@ library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
 ```
+
+# Conclusions
+
+
+
+Lately temperatures tend to drop and so does the energy consumption. The cold winter of 2010 shows up in the plot as an increase in the specific consumption for that year. Regarding the fuels and the co2 emissions, MFH buildings tend to use more environmental friendly fuels, such as waerme and erdgass,
+but SFH houses tend to use heizoel. Holzpellets are a new trend and people tend to use them more. Erdgas is one of mostly used and also eco-friendly. Hessen is the state which produces the most co2 emissions. Saarland, Hmaburg and Bayern are among the most eco-friendly states and have lowest numbers of co2 emissions.
