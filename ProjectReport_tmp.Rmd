@@ -17,8 +17,9 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 
 # 1. Abstract
 
-The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of [co2online.de](www.co2online.de), which has information on more than two million households in this time frame. The information was provided by private individuals, who gave information relating to the building's energy consumption for a year and features relating to the building (age, area, fuel type, refurbishment measures already carried out, etc.) in return for an evaluation of the building's energy efficiency and suggested refurbishment
-measures. The data are signifiicant from a political perspective, since energy consumption and 
+The aim of this report is to investigate heating energy consumption in residential buildings in Germany over the time frame 2002-2018. The data on which this investigation is based come from the online portal of co2online.de, which has information on more than two million households in this time frame. (Trends in heating energy consumption).
+
+Has political significance - Klimaschutz, CO2 footprint, etc.
 
 
 # 2. Description of the data
@@ -40,15 +41,12 @@ source(paste0(path_to_file , "getBundeslandfromCode.R"))
 source(paste0(path_to_file , "getBundeslandfromLK.R"))
 source(paste0(path_to_file , "getSpecificConsumptionByYear.R"))
 source(paste0(path_to_file , "getConsumptionPerEnergieTraeger.R"))
-
 #get data from the Rdata files, impose consistency in data types etc.
 DL_MFH <- getGermanyData(gtype = "MFH")
 DL_SFH <- getGermanyData(gtype = "SFH")
-
 #remove outliers:
 DL_MFH <- cleanData(DL_MFH , "MFH")
 DL_SFH <- cleanData(DL_SFH , "SFH")
-
 #find bundesland
 DL_MFH <- getBundeslandfromCode(DL_MFH)
 DL_SFH <- getBundeslandfromCode(DL_SFH)
@@ -56,12 +54,8 @@ DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
 #unique(DL_MFH$bundesland)
 #unique(DL_MFH$bundesland)
-
 source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
-```
-
-```{r}
-#source(paste0(path_to_file , "getCo2Emissions.R"))
+source(paste0(path_to_file , "getCo2Emissions.R"))
 ```
 
 # 4. Energy consumption trends across Germany
@@ -77,11 +71,11 @@ ALL_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "A
 ```
 
 ```{r}
-#require(ggplot2)
-#ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
-#)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
-#)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
-#)+scale_color_discrete(name=" ",labels=c("ALL","MFH","SFH"))+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
+require(ggplot2)
+ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
+)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
+)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
+)+scale_color_discrete(name=" ",labels=c("ALL","MFH","SFH"))+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
 
@@ -124,12 +118,10 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 i <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
   geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
-
 require(grid)
 require(gridExtra)
-
-grid.arrange(i,ncol=2)
-#i
+#grid.arrange(i,ncol=2)
+i
 ```
 
 
@@ -137,20 +129,17 @@ grid.arrange(i,ncol=2)
 i <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
   geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
 grid.arrange(i,ncol=2)
-#i
+i
 ```
 
 ```{r}
-
 i <- ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
   geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
   theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
-grid.arrange(i,ncol=2)
+#grid.arrange(i,ncol=2)
 #absolute_freq(rbind(DL_SFH, DL_MFH))
-#i
+i
 ```
 
 
@@ -160,14 +149,13 @@ grid.arrange(i,ncol=2)
 ```{r}
 #now subset bundesland and do the calculations for specific consumption
 # (1) MFH case #calculate the specific consumption and the slope
-
 states <- sort(unique(DL_MFH$bundesland))
 bundlands_SV_mfh <- list()
 bundlands_SV_sfh <- list()
 bundlands_SV_all <- list()
 for (s in states) {
   #For MFH:
-  #print(s)
+  print(s)
   bund_data_mfh <- DL_MFH[DL_MFH$bundesland == s  ,  ]
   specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=NULL , gtype="MFH")
   #above is a dataframe with columns "abrechnungsjahr","Area","Consumption","spz_verbrauch"
@@ -180,7 +168,6 @@ for (s in states) {
   specific_con <- getSpecificConsumptionByYear(mfh=bund_data_mfh , sfh=bund_data_sfh , gtype="ALL")
   bundlands_SV_all[[s]] <- specific_con
 }
-
 #collect into single data frame - these will be used for plotting in plotly
 bundSV_mfh_df <- data.frame(abrechnungsjahr=2002:2018)
 bundSV_sfh_df <- data.frame(abrechnungsjahr=2002:2018)
@@ -235,12 +222,10 @@ p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
 #p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>% add_markers(y = ~get(states[1]), name = " ",marker=list(color="black"))
 #for (i in 2:16) {
 #  p <- p %>% add_markers(y = ~get(states[i]), name = " " , marker=list(color="black"), visible = F)
 #}
-
 p <- p %>% layout(showlegend=FALSE,
   title = "Multifamily Houses",
   xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
@@ -251,9 +236,6 @@ p <- p %>% layout(showlegend=FALSE,
     )
   )
 )
-```
-
-```{r,fig.cap="\\label{fig:figs}Fig. 7: Heat map"}
 p
 ```
 
@@ -304,7 +286,6 @@ for (s in states) {
 slopes_data$MFH <- slope_values_mfh 
 slopes_data$SFH <- slope_values_sfh
 slopes_data$ALL <- slope_values_all
-
 library(sf)
 library(dplyr)
 library(ggplot2)
@@ -351,7 +332,6 @@ p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[14]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
-
 p <- p %>% layout(showlegend=FALSE,
   title = "1-2 Family Houses",
   xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
@@ -362,7 +342,6 @@ p <- p %>% layout(showlegend=FALSE,
     )
   )
 )
-
 p
 ```
 
@@ -446,7 +425,6 @@ p <- p %>% layout(showlegend=FALSE,
     )
   )
 )
-
 p
 ```
 
@@ -496,35 +474,28 @@ tm_shape(DL_map) + tm_polygons("ALL",
 
 ```{r}
 library(plotly)
-
 tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
 p <- plot_ly(
     x = tmp$Group.2, y = tmp$Group.1,
     z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
     title = 'Consumption per Bundesland and year for MFH',
     xaxis = list(range = 2012:2018))
-
-
 p
 ```
 
 ```{r}
 library(plotly)
-
 tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
 p <- plot_ly(
     x = tmp$Group.2, y = tmp$Group.1,
     z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
     title = 'Consumption per Bundesland and year for SFH',
     xaxis = list(range = 2012:2018))
-
-
 p
 ```
 
 ```{r}
 library(plotly)
-
 bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
 tmp <- aggregate(bind[c(-1, -2)], 
                  by=list(bind$bundesland, bind$abrechnungsjahr), FUN =mean)
@@ -533,15 +504,18 @@ p <- plot_ly(
     z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
     title = 'Consumption per Bundesland and year for MFH & SFH',
     xaxis = list(range = 2012:2018))
-
-
 p
 ```
 
 
+## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
+
+
+## 5e. Interactive maps for federal states for 1-2 family houses
 
 
 
+## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
 
 ```{r}
 library(plotly)
@@ -598,7 +572,6 @@ get_relative_frequencies_interactive_all <- function() {
   bundlands_energietraeger_all <- average_by_year_energietrager(rbind(DL_MFH, DL_SFH))
   bundlands_energietraeger_mfh <- average_by_year_energietrager(DL_MFH)
   bundlands_energietraeger_sfh <- average_by_year_energietrager(DL_SFH)
-
 p <- plot_ly(type = 'bar', colors = "Blues") 
   
   p <- plot_ly(type = 'bar')
@@ -695,7 +668,6 @@ get_co2_emissions_interactive_all <- function() {
   )
   return(p)
 }
-
 ```
 
 
@@ -759,7 +731,6 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
   )
   return(p)
 }
-
 ```
 
 
@@ -778,7 +749,6 @@ get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Procent
 ```{r}
 library(plotly)
 library(tidyr)
-
 get_co2_emissions_interactive(mfh_area, rbind(DL_SFH, DL_MFH), co2_coef, 'SFH & MFH - Co2 Emissions by Bundesland')
 ```
 
@@ -789,7 +759,6 @@ get_relative_frequencies_interactive(DL_MFH, 'MFH - Procentual consumption per f
 ```{r}
 library(plotly)
 library(tidyr)
-
 get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland (Megatonnes)')
 ```
 
@@ -800,7 +769,6 @@ get_relative_frequencies_interactive(DL_SFH, 'SFH - Procentual consumption per f
 ```{r}
 library(plotly)
 library(tidyr)
-
 get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland  (Megatonnes)')
 ```
 
@@ -808,10 +776,8 @@ get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions b
 ```{r}
 library(tmap)
 library(tmaptools)
-
 DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
 map_data <- get_map_data_co2()
-
 DL_map$ALL <- map_data$ALL
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("ALL",
@@ -825,12 +791,10 @@ tm_shape(DL_map) + tm_polygons("ALL",
 ```
 
 
-```
+```{r}
 library(tmap)
 library(tmaptools)
-
 DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
-
 DL_map$MFH <- map_data$MFH
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("MFH",
@@ -843,12 +807,10 @@ tm_shape(DL_map) + tm_polygons("MFH",
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
 
-```
+```{r}
 library(tmap)
 library(tmaptools)
-
 DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
-
 DL_map$SFH <- map_data$SFH
 tmap_mode("view")
 tm_shape(DL_map) + tm_polygons("SFH",
