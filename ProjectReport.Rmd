@@ -128,7 +128,7 @@ ggplot(data=germany_winter_temp,aes(x=Year,y=Temperature))+geom_point()+geom_smo
 ```
 
 
-The plot shows an overall increase when one considers the linear trend, and hence has definitely contributed to the decrease in energy consumption. To what extent the decrease in energy consumption is caused by the aforementioned three factors is an interesting question which needs further investigation. One possible solution is to do a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably). Due to time constraints we have not followed that option here.
+The plot shows an overall increase when one considers the linear trend, and hence has definitely contributed to the decrease in energy consumption. To what extent the decrease in energy consumption is caused by the aforementioned three factors is an interesting question which needs further investigation. One possible solution is to do a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably). This we do shortly.
 
 In Fig. 1, there is a sharp increase in energy consumption for the year 2010. This corresponds to the extremely cold winter of the year 2010, as seen in Fig. 2, or in Fig. 3.
 
@@ -210,10 +210,10 @@ ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype)
         stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150)) 
 ```
 
-When we use interaction between the year and the building type we get a better fit to the data.
+When we use interaction between the year and the building type we get a better fit to the data. We next use a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably).
 
 ```{r}
-## effect of temperature on MFH
+# effect of temperature on MFH
 fit3=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = MFH_spez_verbrauch)
 summary(fit3)
 
@@ -224,10 +224,10 @@ equation1=function(x){coef(fit3)[2]*x+coef(fit3)[1]}
 equation2=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]}
 
 # for 3rd
-equation3=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]+coef(fit3)[4]}
+equation3=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[4]}
 
 # for 4th
-equation4=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[3]+coef(fit3)[4]+coef(fit3)[5]}
+equation4=function(x){coef(fit3)[2]*x+coef(fit3)[1]+coef(fit3)[5]}
 
 ggplot(MFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+geom_point()+
         stat_function(fun=equation1,geom="line",color=scales::hue_pal()(4)[1])+
@@ -250,17 +250,17 @@ equation1=function(x){coef(fit4)[2]*x+coef(fit4)[1]}
 equation2=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]}
 
 # for 3rd
-equation3=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]+coef(fit4)[4]}
+equation3=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[4]}
 
 # for 4th
-equation4=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[3]+coef(fit3)[4]+coef(fit4)[5]}
+equation4=function(x){coef(fit4)[2]*x+coef(fit4)[1]+coef(fit4)[5]}
 
 ggplot(SFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+geom_point()+
         stat_function(fun=equation1,geom="line",color=scales::hue_pal()(4)[1])+
         stat_function(fun=equation2,geom="line",color=scales::hue_pal()(4)[2])+
         stat_function(fun=equation3,geom="line",color=scales::hue_pal()(4)[3])+
         stat_function(fun=equation4,geom="line",color=scales::hue_pal()(4)[4])+
-        labs(title="EFFECT OF TEMPERTURE IN MFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
+        labs(title="EFFECT OF TEMPERTURE IN SFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
 ```
 
 
@@ -517,7 +517,7 @@ which is not the case for single-family houses where the heizoel is kind of cons
 
 # 5b CO2 Emissons in all Germany
 
-The following code shows the co2 emitted in Germany.
+The following figure shows the co2 emitted in Germany.
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 6"}
 get_co2_emissions_interactive_all()
@@ -578,7 +578,7 @@ In the next sections we explore several visualization techniques for the above d
 
 ## 6b. Specific Energy Consumption for MFH for the federal states
 
-The next plot shows the specific energy consumption for the 16 federal states in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
+The next plot shows the specific energy consumption for the 16 federal states for multifamily houses in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
 
 ```{r}
 get_VC <- function() {
@@ -749,6 +749,9 @@ tm_shape(DL_map) + tm_polygons("MFH",
 
 ## 6c. Specific Energy Consumption for 1-2 Family Houses for the federal states
 
+The next plot shows the specific energy consumption for the 16 federal states for 1-2 family houses in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
+
+
 ```{r,fig.cap="\\label{fig:figs}Fig. 11:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
 p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
@@ -782,6 +785,9 @@ p <- p %>% layout(showlegend=FALSE,
 p
 ```
 
+
+
+The same information can be put into a single heat map:
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 12:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
 
