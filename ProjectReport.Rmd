@@ -238,6 +238,9 @@ ggplot(MFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+
 ```
 
 
+The above graph shows that the increase in temperature is not the sole reason for the decrease in specific consumption of energy. Refurbishment measures also play an important role. As expected, with increasing temperature, the specific energy consumption decreases. But for the four groups of `abrechnungsjahr`, the energy consumption perceptibly decreases following the temporal passage of the years.
+
+
 ```{r}
 # effect of temperature on SFH
 fit4=lm(spz_verbrauch ~ temp + as.factor(yearbin),data = SFH_spez_verbrauch)
