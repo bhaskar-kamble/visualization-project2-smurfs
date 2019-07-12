@@ -17,6 +17,8 @@ getBundeslandfromCode <- function(obj) { #obj is either DL_MFH, or DL_SFH, or a 
   obj$bundesland[obj$bundesland=="15"]  <- "Schleswig-Holstein"
   obj$bundesland[obj$bundesland=="16"]  <- "Thueringen"
   obj$bundesland[obj$bundesland=="Baden-W\xfcrttemberg"]  <- "Baden-Wuerttemberg"
+  obj$bundesland[obj$bundesland=="Baden-Württemberg"]  <- "Baden-Wuerttemberg"
+  obj$bundesland[obj$bundesland=="Baden-W?rttemberg"]  <- "Baden-Wuerttemberg"
   obj$bundesland[obj$bundesland=="Th\xfcringen"]  <- "Thueringen"
   
   return(obj)
