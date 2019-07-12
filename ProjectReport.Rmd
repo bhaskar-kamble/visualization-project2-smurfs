@@ -536,14 +536,6 @@ p
 ```
 
 
-## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
-
-
-## 5e. Interactive maps for federal states for 1-2 family houses
-
-
-
-## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
 
 
 
