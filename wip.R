@@ -3,7 +3,7 @@ bundSV_mfh_sfh_df <- rbind(bundSV_mfh_df, bundSV_sfh_df)
 
 bundSV_mfh_sfh_df$gtype <- c(rep('MFH', 17), rep('SFH', 17))
 bundSV_mfh_sfh_df
-lm1 <- lm(as.matrix(bundSV_mfh_sfh_df[states[1]] ) ~ rep(abrechnungsjahr, 2)*as.factor(gtype), data = bundSV_mfh_sfh_df )
+lm1 <- lm(as.matrix(bundSV_mfh_sfh_df[states[1]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
 lm2 <- lm(as.matrix(bundSV_mfh_sfh_df[states[2]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
 lm3 <- lm(as.matrix(bundSV_mfh_sfh_df[states[3]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
 lm4 <- lm(as.matrix(bundSV_mfh_sfh_df[states[4]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
@@ -19,12 +19,14 @@ lm13 <- lm(as.matrix(bundSV_mfh_sfh_df[states[13]] ) ~ abrechnungsjahr*as.factor
 lm14 <- lm(as.matrix(bundSV_mfh_sfh_df[states[14]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
 lm15 <- lm(as.matrix(bundSV_mfh_sfh_df[states[15]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
 lm16 <- lm(as.matrix(bundSV_mfh_sfh_df[states[16]] ) ~ abrechnungsjahr*as.factor(gtype), data = bundSV_mfh_sfh_df )
+as.logical(as.numeric(as.factor(bundSV_mfh_sfh_df$gtype))-1)
 
-bundSV_mfh_sfh_df[[states[1]]]
-p <- plot_ly(bundSV_mfh_sfh_df , x = rep(abrechnungsjahr, 2), color = ~gtype) %>%
+p <- plot_ly(bundSV_mfh_sfh_df , x = rep(abrechnungsjahr, 2), 
+             color = ~as.logical(as.numeric(as.factor(gtype))-1),  colors = c("#132B43", "#56B1F7")) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_lines(y = ~fitted(lm1),
-            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F) %>%
+            line = list(color = '#07A4B5'), showlegend = TRUE, visible = F)
+%>%
   
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
   add_lines(y = ~fitted(lm2),
