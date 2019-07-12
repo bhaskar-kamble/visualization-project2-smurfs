@@ -173,26 +173,29 @@ get_visibility_combinations_co2 <- function() {
 
 #########################################################################################
 
-get_map_data_co2 <- function() {
+get_map_data_co2 <- function(year) {
   enegietraeger <- unique(DL_MFH$energietraeger)
   mfh <- convert_area_to_co2_emissions(mfh_area,DL_MFH,co2_coef)
   mfh$mean <- apply(mfh[enegietraeger], 1, sum)
-  mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, mean = mfh$mean)[abrechnungsjahr == 2018,]
+  mfh <- data.frame(abrechnungsjahr = mfh$abrechnungsjahr, bundesland = mfh$bundesland, 
+                    mean = mfh$mean)[abrechnungsjahr == year,]
 
   sfh <- convert_area_to_co2_emissions(sfh_area, DL_SFH, co2_coef)
   sfh$mean <- apply(sfh[unique(DL_SFH$energietraeger)], 1, sum)
-  sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, mean = sfh$mean)[abrechnungsjahr == 2018,]
+  sfh <- data.frame(abrechnungsjahr = sfh$abrechnungsjahr, bundesland = sfh$bundesland, 
+                    mean = sfh$mean)[abrechnungsjahr == year,]
 
   
   all_area_m <- sfh_area
   names(all_area_m) <- c('abrechnungsjahr', states)
-  names(mfh_area_m) <- c('abrechnungsjahr', states)
+  names(mfh_area) <- c('abrechnungsjahr', states)
   for (state in states) {
     all_area_m[[state]] <- as.numeric(as.character(all_area_m[[state]])) + as.numeric(as.character(mfh_area[[state]]))
-  })
+  }
   all <- convert_area_to_co2_emissions(all_area_m, rbind(DL_MFH, DL_SFH), co2_coef)
   all$mean <- apply(all[enegietraeger], 1, sum)
-  all <- data.frame(abrechnungsjahr = all$abrechnungsjahr, bundesland = all$bundesland, mean = all$mean)[abrechnungsjahr == 2018,]
+  all <- data.frame(abrechnungsjahr = all$abrechnungsjahr, bundesland = all$bundesland, 
+                    mean = all$mean)[abrechnungsjahr == year,]
   
   
   data <-data.frame(bundesland = unique(DL_MFH$bundesland), MFH = rep(NA, 16), SFH = rep(NA, 16), ALL = rep(NA, 16))
@@ -204,5 +207,3 @@ get_map_data_co2 <- function() {
   }
   data
 }
-
-get_map_data_co2()

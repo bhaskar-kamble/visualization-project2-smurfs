@@ -116,44 +116,12 @@ slopedata <- data.frame(gtype=c("MFH","SFH","Both"),slope=abs(c(bmfh[2],bsfh[2],
 ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) + geom_errorbar(aes(ymin=slope_low,ymax=slope_high),width=0.2) + coord_flip() + labs(title="Rate of change of specific energy consumption in Germany (2002 - 2018)",x="Building type")+theme_bw()
 ```
 
-## 4b. Proportion of fuel sources
-
-```{r}
-i <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
-
-require(grid)
-require(gridExtra)
-
-#grid.arrange(i,ncol=2)
-i
-```
-
-
-```{r}
-i <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
-grid.arrange(i,ncol=2)
-i
-```
-
-```{r}
-
-i <- ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
-#grid.arrange(i,ncol=2)
-#absolute_freq(rbind(DL_SFH, DL_MFH))
-i
-```
 
 
 
-# 5. Energy consumption trends across the 16 Federal states
+
+
+# 4. Energy consumption trends across the 16 Federal states
 
 ```{r}
 #now subset bundesland and do the calculations for specific consumption
@@ -811,7 +779,7 @@ library(tmap)
 library(tmaptools)
 
 DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
-map_data <- get_map_data_co2()
+map_data <- get_map_data_co2(2002)
 
 DL_map$ALL <- map_data$ALL
 tmap_mode("view")
@@ -826,11 +794,10 @@ tm_shape(DL_map) + tm_polygons("ALL",
 ```
 
 
+
 ```{r}
 library(tmap)
 library(tmaptools)
-
-DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
 
 DL_map$MFH <- map_data$MFH
 tmap_mode("view")
