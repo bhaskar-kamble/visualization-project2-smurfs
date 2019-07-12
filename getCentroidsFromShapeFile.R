@@ -1,7 +1,8 @@
 library(sf)
 library(dplyr)
 library(ggplot2)
-path_to_file_2 <- "./shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
+path_to_file_2 <- "D:/GITHUB_REPOS/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
+#path_to_file_2 <- "./shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
 #path_to_file_2 <- "~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/" #please do not delete, comment out if required
 
 #####################################################################################

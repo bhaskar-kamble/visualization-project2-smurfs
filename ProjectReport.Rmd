@@ -33,8 +33,8 @@ Do str(data) in the next section.
 # 3. Getting and cleaning the data
 
 ```{r}
-#path_to_file <- ""
-path_to_file <- "./"
+path_to_file <- "D:/GITHUB_REPOS/visualization-project2-smurfs/"
+#path_to_file <- "./"
 source(paste0(path_to_file , "getGermanyData.R"))
 source(paste0(path_to_file , "cleanData.R"))
 source(paste0(path_to_file , "getBundeslandfromCode.R"))
@@ -55,13 +55,15 @@ DL_MFH <- getBundeslandfromCode(DL_MFH)
 DL_SFH <- getBundeslandfromCode(DL_SFH)
 DL_SFH <- DL_SFH[!is.na(DL_SFH$bundesland) , ]
 DL_SFH <- getBundeslandfromLK(DL_SFH)
-unique(DL_MFH$bundesland)
-unique(DL_MFH$bundesland)
+#unique(DL_MFH$bundesland)
+#unique(DL_MFH$bundesland)
 
 source(paste0(path_to_file, "getCentroidsFromShapeFile.R"))
 ```
 
 # 4. Energy consumption trends across Germany
+
+## 4a. Specific Energy Consumtion trends
 
 ```{r}
 #library(mosaic)
@@ -71,41 +73,8 @@ SFH_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "S
 ALL_spez_verbrauch <- getSpecificConsumptionByYear( DL_MFH , DL_SFH , gtype = "ALL")
 ```
 
-```{r}
+```
 require(ggplot2)
-#g_mfh <- ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-#)+scale_y_continuous(limits=c(0,150))
-
-#g_sfh <- ggplot() + geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-#)+scale_y_continuous(limits=c(0,150))
-
-#g_all <- ggplot() + geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch)
-#)+scale_y_continuous(limits=c(0,150))
-```
-
-```{r}
-#g_mfh+labs(title="MFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
-```
-
-```{r}
-#g_sfh+labs(title="1-2FH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
-```
-
-```{r}
-#g_all+labs(title="MFH+SFH")+scale_x_continuous(name="Year")+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150))
-```
-
-
-
-
-```{r}
-#ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
-#)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
-#)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
-#)+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
-```
-
-```{r}
 ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
 )+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
 )+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
@@ -113,10 +82,79 @@ ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verb
 ```
 
 
+```{r}
+require(ggplot2)
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+ggplot() + geom_point(data=MFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="MFH")
+)+geom_point(data=SFH_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="SFH")
+)+geom_point(data=ALL_spez_verbrauch , aes(x=abrechnungsjahr,y=spz_verbrauch,color="ALL")
+)+geom_smooth(method="lm",data=MFH_spez_verbrauch,aes(x=abrechnungsjahr,y=spz_verbrauch),color=gg_color_hue(3)[2],se=FALSE
+)+geom_smooth(method="lm",data=SFH_spez_verbrauch,aes(x=abrechnungsjahr,y=spz_verbrauch),color=gg_color_hue(3)[3],se=FALSE
+)+geom_smooth(method="lm",data=ALL_spez_verbrauch,aes(x=abrechnungsjahr,y=spz_verbrauch),color=gg_color_hue(3)[1],se=FALSE
+)+scale_color_discrete(name=" ",labels=c("ALL","MFH","SFH"))+scale_y_continuous(limits=c(0,150))+theme_bw()+scale_x_continuous(breaks=seq(2002,2018,2))+labs(x="Year",y=bquote("Specific Consumption" ~ (kWh/m^2)) )
+```
 
-Mention about the winter of 2010. Maybe also the 2013(?) when it was warm.
 
-# 5. Energy consumption trends across the 16 Federal states (Bundesl?nder)
+![Temperatures in Germany from 1881 - 2018. Source: wikipedia](1000px-Zeitreihe_der_Temperaturen_in_Deutschland.svg.png)
+
+
+```{r}
+lm_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = MFH_spez_verbrauch)
+lm_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = SFH_spez_verbrauch)
+lm_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = ALL_spez_verbrauch)
+bmfh <- c(as.numeric(lm_mfh$coefficients[1]),as.numeric(lm_mfh$coefficients[2]))
+bsfh <- c(as.numeric(lm_sfh$coefficients[1]),as.numeric(lm_sfh$coefficients[2]))
+ball <- c(as.numeric(lm_all$coefficients[1]),as.numeric(lm_all$coefficients[2]))
+slope_low  <- abs(c(confint(lm_mfh,"abrechnungsjahr",level=0.95)[2],confint(lm_sfh,"abrechnungsjahr",level=0.95)[2],confint(lm_all,"abrechnungsjahr",level=0.95)[2]))
+slope_high  <- abs(c(confint(lm_mfh,"abrechnungsjahr",level=0.95)[1],confint(lm_sfh,"abrechnungsjahr",level=0.95)[1],confint(lm_all,"abrechnungsjahr",level=0.95)[1]))
+slope_high <-
+slopedata <- data.frame(gtype=c("MFH","SFH","Both"),slope=abs(c(bmfh[2],bsfh[2],ball[2])),slope_low=slope_low,slope_high=slope_high)
+ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) + geom_errorbar(aes(ymin=slope_low,ymax=slope_high),width=0.2) + coord_flip() + labs(title="Rate of change of specific energy consumption in Germany (2002 - 2018)",x="Building type")+theme_bw()
+```
+
+## 4b. Proportion of fuel sources
+
+```{r}
+i <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
+
+require(grid)
+require(gridExtra)
+
+#grid.arrange(i,ncol=2)
+i
+```
+
+
+```{r}
+i <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
+  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
+
+#grid.arrange(i,ncol=2)
+
+#absolute_freq(DL_SFH)
+i
+```
+
+```{r}
+
+i <- ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
+  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
+  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
+
+#grid.arrange(i,ncol=2)
+#absolute_freq(rbind(DL_SFH, DL_MFH))
+i
+```
+
+
+
+# 5. Energy consumption trends across the 16 Federal states
 
 ```{r}
 #now subset bundesland and do the calculations for specific consumption
@@ -155,24 +193,27 @@ for (s in names(bundlands_SV_mfh)) {
 
 
 
-https://bookdown.org/paulcbauer/idv2/2-contact-material-dates.html 
-
-https://moderndata.plot.ly/new-feature-dropdown-menus-in-plotly-and-r/ 
-
-http://personal.tcu.edu/kylewalker/articles/walker-2016-spatial-demography.html
-
-https://moderndata.plot.ly/using-the-pipe-operator-in-r-with-plotly/
-
-https://davidgohel.github.io/ggiraph/articles/offcran/using_ggiraph.html
-
-https://plot.ly/r/dropdowns/
-
-https://plotly-r.com/introduction.html 
-
-
 
 
 ## 5a. Specific Energy Consumption for MFH for the federal states
+
+```{r}
+get_VC <- function() {
+  visibility_combinations <- list()
+  i = 1
+  for (state in states) {
+    to = 16
+    vis <- rep(F, to)
+    vis[i] <- TRUE
+    visibility_combinations[[i]] <- list(method = "restyle",
+                                         args = list("visible", as.list(vis)),
+                                         label = state)
+    i = i + 1
+  }
+  return(visibility_combinations)
+}
+```
+
 
 ```{r}
 library(plotly)
@@ -194,68 +235,97 @@ p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[15]), name = " " , marker=list(color="black"), visible = F) %>%
   add_markers(y = ~get(states[16]), name = " " , marker=list(color="black"), visible = F)
 
+#p <- plot_ly(bundSV_mfh_df , x = ~abrechnungsjahr) %>% add_markers(y = ~get(states[1]), name = " ",marker=list(color="black"))
+#for (i in 2:16) {
+#  p <- p %>% add_markers(y = ~get(states[i]), name = " " , marker=list(color="black"), visible = F)
+#}
+
 p <- p %>% layout(showlegend=FALSE,
   title = "Multifamily Houses",
   xaxis = list(title = "Year",tickvals=list(2002,2004,2006,2008,2010,2012,2014,2016,2018)),
   yaxis = list(title = "kWh/m2",range=c(0,150),tickvals=list(0,20,40,60,80,100,120,140)),
   updatemenus = list(
     list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
+      buttons = get_VC()
     )
   )
 )
 
 p
 ```
+
+
+
+```{r}
+abrechnungsjahr = 2002:2018
+lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_mfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_mfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_mfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_mfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_mfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_mfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_mfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_mfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_mfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_mfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_mfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_mfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_mfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_mfh_df[states[16]]) ~ abrechnungsjahr)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
+
+```{r}
+slopes_data <- data.frame(bundesland=states)
+slope_values_mfh <- NULL
+slope_values_sfh <- NULL
+slope_values_all <- NULL
+for (s in states) {
+  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
+  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
+  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
+  
+  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
+  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
+  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
+}
+slopes_data$MFH <- slope_values_mfh 
+slopes_data$SFH <- slope_values_sfh
+slopes_data$ALL <- slope_values_all
+
+library(sf)
+library(dplyr)
+library(ggplot2)
+DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE,quiet = TRUE)
+#DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
+#                 stringsAsFactors = FALSE)
+```
+
+```{r}
+library(tmap)
+library(tmaptools)
+DL_map$MFH <- slopes_data$MFH
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("MFH",
+                               id="NAME_1",
+                               popup.vars=c("MFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
+
 
 
 ## 5b. Specific Energy Consumption for 1-2 Family Houses for the federal states
@@ -285,62 +355,58 @@ p <- p %>% layout(showlegend=FALSE,
   yaxis = list(title = "kWh/m2",range=c(0,180),tickvals=list(0,20,40,60,80,100,120,140,160,180)),
   updatemenus = list(
     list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
+      buttons = get_VC()
     )
   )
 )
 
 p
 ```
+
+
+
+```{r}
+lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_sfh_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_sfh_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_sfh_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_sfh_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_sfh_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_sfh_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_sfh_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_sfh_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_sfh_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_sfh_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_sfh_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_sfh_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_sfh_df[states[16]]) ~ abrechnungsjahr)
+library(ggplot2)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="SFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
+```
+
+
+```{r}
+DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
+tmap_mode("view")
+tm_shape(DL_map) + tm_polygons("SFH",
+                               id="NAME_1",
+                               popup.vars=c("SFH"),
+                               style="cont",
+                               midpoint=NA,
+                               palette="seq"
+                               #legend.reverse=TRUE - Gives WRONG info!
+)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+```
+
 
 
 ## 5c. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
@@ -373,56 +439,7 @@ p <- p %>% layout(showlegend=FALSE,
   shapes=list(type='line', x0= 2001, x1= 2001, y0=0, y1=160, line=list(width=1)),
   updatemenus = list(
     list(
-      buttons = list(
-        list(method = "restyle",
-             args = list("visible",list(T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[1]),
-        list(method = "restyle",
-             args = list("visible",list(F,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[2]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,T,F,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[3]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,T,F,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[4]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,T,F,F,F,F,F,F,F,F,F,F,F)),
-             label = states[5]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,T,F,F,F,F,F,F,F,F,F,F)),
-             label = states[6]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,T,F,F,F,F,F,F,F,F,F)),
-             label = states[7]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,T,F,F,F,F,F,F,F,F)),
-             label = states[8]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,T,F,F,F,F,F,F,F)),
-             label = states[9]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,T,F,F,F,F,F,F)),
-             label = states[10]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,T,F,F,F,F,F)),
-             label = states[11]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,T,F,F,F,F)),
-             label = states[12]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,T,F,F,F)),
-             label = states[13]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,T,F,F)),
-             label = states[14]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,F)),
-             label = states[15]),
-        list(method = "restyle",
-             args = list("visible",list(F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T)),
-             label = states[16])
-      )
+      buttons = get_VC()
     )
   )
 )
@@ -430,68 +447,34 @@ p <- p %>% layout(showlegend=FALSE,
 p
 ```
 
-
-## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
-
 ```{r}
-slopes_data <- data.frame(bundesland=states)
-slope_values_mfh <- NULL
-slope_values_sfh <- NULL
-slope_values_all <- NULL
-for (s in states) {
-  lm_sv_bund_mfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_mfh[[s]])
-  lm_sv_bund_sfh <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_sfh[[s]])
-  lm_sv_bund_all <- lm(spz_verbrauch ~ abrechnungsjahr , data = bundlands_SV_all[[s]])
-  
-  slope_values_mfh <- c(slope_values_mfh , lm_sv_bund_mfh$coefficients[2])
-  slope_values_sfh <- c(slope_values_sfh , lm_sv_bund_sfh$coefficients[2])
-  slope_values_all <- c(slope_values_all , lm_sv_bund_all$coefficients[2])
-}
-slopes_data$MFH <- slope_values_mfh 
-slopes_data$SFH <- slope_values_sfh
-slopes_data$ALL <- slope_values_all
-
-library(sf)
-library(dplyr)
-library(ggplot2)
-DL_map <- st_read("shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",stringsAsFactors = FALSE)
-#DL_map <- st_read("~/Desktop/visualization-project2-smurfs/shapefiles/gadm36_DEU_shp/gadm36_DEU_1.shp",
-#                 stringsAsFactors = FALSE)
-```
-
-```{r}
-library(tmap)
-library(tmaptools)
-DL_map$MFH <- slopes_data$MFH #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("MFH",
-                               id="NAME_1",
-                               popup.vars=c("MFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
+lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
+lm2 <- lm(as.matrix(bundSV_all_df[states[2]]) ~ abrechnungsjahr)
+lm3 <- lm(as.matrix(bundSV_all_df[states[3]]) ~ abrechnungsjahr)
+lm4 <- lm(as.matrix(bundSV_all_df[states[4]]) ~ abrechnungsjahr)
+lm5 <- lm(as.matrix(bundSV_all_df[states[5]]) ~ abrechnungsjahr)
+lm6 <- lm(as.matrix(bundSV_all_df[states[6]]) ~ abrechnungsjahr)
+lm7 <- lm(as.matrix(bundSV_all_df[states[7]]) ~ abrechnungsjahr)
+lm8 <- lm(as.matrix(bundSV_all_df[states[8]]) ~ abrechnungsjahr)
+lm9 <- lm(as.matrix(bundSV_all_df[states[9]]) ~ abrechnungsjahr)
+lm10 <- lm(as.matrix(bundSV_all_df[states[10]]) ~ abrechnungsjahr)
+lm11 <- lm(as.matrix(bundSV_all_df[states[11]]) ~ abrechnungsjahr)
+lm12 <- lm(as.matrix(bundSV_all_df[states[12]]) ~ abrechnungsjahr)
+lm13 <- lm(as.matrix(bundSV_all_df[states[13]]) ~ abrechnungsjahr)
+lm14 <- lm(as.matrix(bundSV_all_df[states[14]]) ~ abrechnungsjahr)
+lm15 <- lm(as.matrix(bundSV_all_df[states[15]]) ~ abrechnungsjahr)
+lm16 <- lm(as.matrix(bundSV_all_df[states[16]]) ~ abrechnungsjahr)
+slope <- c(abs(summary(lm1)$coefficient[2]), abs(summary(lm2)$coefficient[2]), abs(summary(lm3)$coefficient[2]),abs(summary(lm4)$coefficient[2]), abs(summary(lm5)$coefficient[2]), abs(summary(lm6)$coefficient[2]),
+abs(summary(lm7)$coefficient[2]), abs(summary(lm8)$coefficient[2]), abs(summary(lm9)$coefficient[2]), abs(summary(lm10)$coefficient[2]), abs(summary(lm11)$coefficient[2]), abs(summary(lm12)$coefficient[2]), abs(summary(lm13)$coefficient[2]), abs(summary(lm14)$coefficient[2]), abs(summary(lm15)$coefficient[2]), abs(summary(lm16)$coefficient[2]))
+#slope <- sort(slope)
+#states <- sort(unique(DL_MFH$bundesland))
+mydata <-data.frame(slope, states)
+mydata$states <- factor(mydata$states,levels=mydata$states[order(mydata$slope)])
+p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip()
+p +labs(title="ALL",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 ```
 
 
-## 5e. Interactive maps for federal states for 1-2 family houses
-
-```{r}
-DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
-tmap_mode("view")
-tm_shape(DL_map) + tm_polygons("SFH",
-                               id="NAME_1",
-                               popup.vars=c("SFH"),
-                               style="cont",
-                               midpoint=NA,
-                               palette="seq"
-                               #legend.reverse=TRUE - Gives WRONG info!
-)+tm_layout(aes.palette=list(seq="-RdYlGn"))
-```
-
-
-## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
 
 ```{r}
 DL_map$ALL <- slopes_data$ALL #merge or inner_join gives error
@@ -507,43 +490,66 @@ tm_shape(DL_map) + tm_polygons("ALL",
 ```
 
 
-## 5g Energy consumption per year MFH (absolute and relative) split by energy source
 
 ```{r}
-i <-  ggplot(data=relative_freq(DL_MFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity") + scale_fill_brewer(palette="Dark2") + ggtitle('MFH - rel freq') +  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical")
+library(plotly)
 
-require(grid)
-require(gridExtra)
+tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH',
+    xaxis = list(range = 2012:2018))
 
-grid.arrange(i,ncol=2)
-```
 
-## 5h. Energy consumption per year SFH (absolute and relative) split by energy source
-
-```{r}
-i <-  ggplot(data=relative_freq(DL_SFH), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
-
-grid.arrange(i,ncol=2)
-
-#absolute_freq(DL_SFH)
+p
 ```
 
 ```{r}
+library(plotly)
 
-i <- ggplot(data=relative_freq(rbind(DL_SFH, DL_MFH)), aes(x=abrechnungsjahr , y=value, fill=energietraeger)) +
-  geom_bar(stat="identity")  + scale_fill_brewer(palette="Dark2") + ggtitle('MFH and SFH - relative freq') + 
-  theme(plot.title = element_text(hjust = 0.5),legend.position=c(1.5,0.5),legend.direction="vertical") 
+tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for SFH',
+    xaxis = list(range = 2012:2018))
 
-grid.arrange(i,ncol=2)
-#absolute_freq(rbind(DL_SFH, DL_MFH))
+
+p
 ```
 
 ```{r}
+library(plotly)
 
+bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
+tmp <- aggregate(bind[c(-1, -2)], 
+                 by=list(bind$bundesland, bind$abrechnungsjahr), FUN =mean)
+p <- plot_ly(
+    x = tmp$Group.2, y = tmp$Group.1,
+    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
+    title = 'Consumption per Bundesland and year for MFH & SFH',
+    xaxis = list(range = 2012:2018))
+
+
+p
+```
+
+
+## 5d. Interactive Maps (show also confidence intervals), like in `02_Bundesland.Rmd` for federal states for Multifamily houses
+
+
+## 5e. Interactive maps for federal states for 1-2 family houses
+
+
+
+## 5f. Interactive maps for federal states for Multi and 1-2 family houses combined
+
+
+
+
+
+```{r}
 get_absolute_frequencies_interactive <- function(data, title) {
   bundlands_energietraeger <- absolute_freq_interactive(data)
   
@@ -585,6 +591,8 @@ get_absolute_frequencies_interactive <- function(data, title) {
 return(p)
 }
 ```
+
+
 ```{r}
 library(plotly)
 library(tidyr)
@@ -678,59 +686,11 @@ library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
 ```
-```{r}
-library(plotly)
-
-tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for MFH',
-    xaxis = list(range = 2012:2018))
 
 
-p
-```
-```{r}
-library(plotly)
-
-tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for SFH',
-    xaxis = list(range = 2012:2018))
 
 
-p
-```
 
-```{r}
-library(plotly)
-
-bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
-tmp <- aggregate(bind[c(-1, -2)], 
-                 by=list(bind$bundesland, bind$abrechnungsjahr), FUN =mean)
-p <- plot_ly(
-    x = tmp$Group.2, y = tmp$Group.1,
-    z = tmp$verbrauch_gesamt_kwh_spez, type = "heatmap") %>% layout(
-    title = 'Consumption per Bundesland and year for MFH & SFH',
-    xaxis = list(range = 2012:2018))
-
-
-p
-```
-# Things to be done
-
-* Adjust the y axis range in Sections 5a, 5b abd 5c.
-* Add bounding box in Sections 5a, 5b abd 5c.
-* Add breaks to x-axis in Sections 5a, 5b abd 5c.
-* Add linear trend and formula of linear trend in in Sections 5a, 5b abd 5c.
-* Add confidence interval of slope in Sections 5d, 5e abd 5f.
-
-# Things that could be done
-
-* Use bookdown.
 * Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
 * Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Bundesland - check if plotly for ggplot is possible.
 * Breakdown of relative energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
