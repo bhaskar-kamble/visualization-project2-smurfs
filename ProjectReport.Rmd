@@ -66,6 +66,12 @@ source(paste0(path_to_file , "getCo2Emissions.R"))
 ```
 
 
+```{r}
+# adding temperature data of winter 
+temp_winter <- read.delim("GermanyWinterTemperatures.txt", header = FALSE, sep = "")
+```
+
+
 ## 3b. Description of the data 
 
 ```{r}
@@ -147,10 +153,77 @@ ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) 
 ```
 
 
+```{r}
+# Combining MFH and SFH data and adding gtype column
+library(dplyr)
+MFH_SFH_spez_verbrauch <- rbind(MFH_spez_verbrauch, SFH_spez_verbrauch )
+MFH_SFH_spez_verbrauch$gtype <- c(rep('MFH', 17), rep('SFH', 17))
 
+# binning the year and adding temp to each dataset
+b <- c(2001, 2006, 2010, 2014, 2018)
+names <- c("2002-2006", "2006-2010", "2010-2014", "2014-2018")
+MFH_spez_verbrauch$yearbin <- cut(MFH_spez_verbrauch$abrechnungsjahr, breaks = b, labels = names) 
+ 
+MFH_spez_verbrauch$temp <- temp_winter[,2]
+
+SFH_spez_verbrauch$yearbin <- cut(SFH_spez_verbrauch$abrechnungsjahr, breaks = b, labels = names) 
+ 
+SFH_spez_verbrauch$temp <- temp_winter[,2]
+
+ALL_spez_verbrauch$yearbin <- cut(ALL_spez_verbrauch$abrechnungsjahr, breaks = b, labels = names) 
+ 
+ALL_spez_verbrauch$temp <- temp_winter[,2]
+```
+
+
+```{r}
+## Multiple regression model without interaction  for MFH_SFH_spez_verbrauch
+fit1=lm(spz_verbrauch ~ abrechnungsjahr + as.factor(gtype),data = MFH_SFH_spez_verbrauch)
+summary(fit1)
+# for MFH
+equation1=function(x){coef(fit1)[2]*x+coef(fit1)[1]}
+
+# for SFH
+equation2=function(x){coef(fit1)[2]*x+coef(fit1)[1]+coef(fit1)[3]}
+
+
+ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype))+geom_point()+
+        stat_function(fun=equation1,geom="line",color=scales::hue_pal()(2)[1])+
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150)) 
+
+
+
+## Multiple regression model with interaction 
+fit2=lm(spz_verbrauch ~ abrechnungsjahr*as.factor(gtype),data = MFH_SFH_spez_verbrauch)
+summary(fit2)
+
+
+# for MFH
+equation1=function(x){coef(fit2)[2]*x+coef(fit2)[1]}
+
+# for SFH
+equation2=function(x){(coef(fit2)[2]+coef(fit2)[4])*x+(coef(fit2)[1]+coef(fit2)[3])}
+
+
+ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype))+geom_point()+
+        stat_function(fun=equation1,geom="line",color=scales::hue_pal()(2)[1])+
+        stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(name="Specific energy consumption (kWh/m2)",limits=c(0,150)) 
+```
+
+When we use interaction between the year and the building type we get a better fit to the data.
 
 # 5. CO2 emissions across Germany
 
+
+In this section we analyze the carbon dioxide emissions for Germany in the time frame 2002-2018. The calculation proceeds as follows:
+
+* From the specific consumption we have the consumption per unit area. We multiply this with the area of the MFH and SFH buildings to give the total consumption for Germany.
+
+* From the data we can find the proportions of the energy fuels for the energy produced.
+
+* From the above two can find how much energy was produced for which source of fuel.
+
+* From the co2 coefficients we can find out how much co2 was produced in each year.
 
 ```{r}
 library(plotly)
@@ -374,7 +447,7 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 
 # 5a Energy consumption per fuel
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 5: xyz"}
 get_relative_frequencies_interactive_all()
 ```
 First let's point out that the heizoel is the most non eco-freindly fuel.
@@ -386,8 +459,8 @@ holzpellets which have also very low influence in the co2 emissions.
 In the multi-family houses we can see a drop down on the heizoel and an increase in the waerme,
 which is not the case for single-family houses where the heizoel is kind of constant, but strom and holzpellets are more used since year 2009.
 
-# 5a CO2 Emissons in all Gemany
-```{r}
+# 5b CO2 Emissons in all Gemany
+```{r,fig.cap="\\label{fig:figs}Fig. 6: xyz"}
 get_co2_emissions_interactive_all()
 ```
 When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany,
@@ -503,7 +576,7 @@ p <- p %>% layout(showlegend=FALSE,
 )
 ```
 
-```{r,fig.cap="\\label{fig:figs}Fig. 5: Interactive plot for the specific energy consumption for the 16 federal states for multifamily houses from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 7: Interactive plot for the specific energy consumption for the 16 federal states for multifamily houses from 2002-2018."}
 p
 ```
 
@@ -511,7 +584,7 @@ p
 We can collect the data from all the states and years into a single heat map as follows:
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 6: Heat map of the specific energy consumption for the year and the state for multifamily houses."}
+```{r,fig.cap="\\label{fig:figs}Fig. 8: Heat map of the specific energy consumption for the year and the state for multifamily houses."}
 library(plotly)
 
 tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
@@ -528,7 +601,7 @@ p
 
 The heat map above shows that Schleswig-Hosltein has quite high energy consumption comapred to the other states in the beginning, which can also be verified from the interactive plot in Fig. 5. For a comparison of how fast the specific energy consumption is falling, we have plotted the bar plots of the absolute values of the slopes of the linear trends in the next graph.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 7: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany"}
+```{r,fig.cap="\\label{fig:figs}Fig. 9: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany"}
 abrechnungsjahr = 2002:2018
 lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
@@ -560,7 +633,7 @@ p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 We have presented the same data as above in an interactive map of the 16 federal states in the next figure. Please click on the respective state to see its name and the slope value in kWh/Year.
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 8: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
+```{r,fig.cap="\\label{fig:figs}Fig. 10: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
 slopes_data <- data.frame(bundesland=states)
 slope_values_mfh <- NULL
 slope_values_sfh <- NULL
@@ -617,7 +690,7 @@ tm_shape(DL_map) + tm_polygons("MFH",
 
 ## 6c. Specific Energy Consumption for 1-2 Family Houses for the federal states
 
-```{r,fig.cap="\\label{fig:figs}Fig. 9:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 11:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
 p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
@@ -651,7 +724,7 @@ p
 ```
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 10:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
+```{r,fig.cap="\\label{fig:figs}Fig. 12:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
 
 library(plotly)
 
@@ -668,7 +741,7 @@ p
 
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 11:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
+```{r,fig.cap="\\label{fig:figs}Fig. 13:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
 lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
@@ -880,7 +953,9 @@ Regarding the co2 emission, an interesing state is Sachsen-Anhalt where we can s
 
 # 7d. Eco-friendliness in 2018 
 
-In this subsection we can see how eco-friendly the states are now, in all Germany, for both MFH, then MFH and SFH separately. We get these numbers by a sequence of compuatations and specific co2 coefficients so that every fuel i s kind of weighted when contirbuting to the co2 emissions.
+
+In this subsection we can see how eco-friendly the states are now, in all Germany, for both MFH & SFH, then MFH and SFH separately. We get these numbers by a sequence of compuatations and specific co2 coefficients so that every fuel i s kind of weighted when contirbuting to the co2 emissions.
+
 ```{r}
 library(tmap)
 library(tmaptools)
@@ -940,7 +1015,7 @@ From all three plots we can conclude that Hessen is the worst bundesland in term
 
 In this section we're goint to take a look in other parameters that contribute to the energy consumption in all german districts. We're taking into account latitude, longitude, gebaeude_baujahr, and, gebaeude_nutzfleche
 
-# 8.a SOM interpretations of MFH
+# 8a SOM interpretations of MFH
 
 ```{r}
 library(plotly)
@@ -949,19 +1024,9 @@ plot_som(DL_MFH)
 ```
 
 
-# 8.b SOM interpretations of SFH
+# 8b SOM interpretations of SFH
 ```{r}
 library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
 ```
-
-
-
-
-
-* Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
-* Breakdown of energy consumption by energietraeger (making a cumulative graph by energietrager) for Bundesland - check if plotly for ggplot is possible.
-* Breakdown of relative energy consumption by energietraeger (making a cumulative graph by energietrager) for Germany.
-* Breakdown of relative energy consumption by energietraeger (making a cumulative graph by energietrager) for Bundesland - check if plotly for ggplot is possible.
-* Bezirk analysis of Berlin - percentage of Fernw?rme in each Bezirk (for example).
