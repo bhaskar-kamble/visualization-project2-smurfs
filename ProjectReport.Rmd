@@ -1085,7 +1085,7 @@ Regarding the co2 emission, an interesing state is Sachsen-Anhalt where we can s
 
 
 
-## 7g. Eco-friendliness in 2018 
+## 7d. Eco-friendliness in 2018 
 
 
 In this subsection we can see how eco-friendly the states are now, in all Germany, for both MFH & SFH, then MFH and SFH separately. We get these numbers by a sequence of compuatations and specific co2 coefficients so that every fuel is kind of weighted when contirbuting to the co2 emissions.
@@ -1157,12 +1157,14 @@ In this section we're goint to take a look in other parameters that contribute t
 
 ## 8a SOM interpretations of MFH
 
+For the SOM analysis we use the following variables: 
+
 ```{r}
 library(plotly)
 library(tidyr)
 plot_som(DL_MFH)
 ```
-
+Fig. 32: SOM for MFH buildings.
 
 ## 8b SOM interpretations of SFH
 ```{r}
@@ -1170,8 +1172,9 @@ library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
 ```
+Fig. 33: SOM for SFH buildings.
+
 
 # 9. Conclusions
 
-Lately temperatures tend to drop and so does the energy consumption. The cold winter of 2010 shows up in the plot as an increase in the specific consumption for that year. Regarding the fuels and the co2 emissions, MFH buildings tend to use more environmental friendly fuels, such as waerme and erdgass,
-but SFH houses tend to use heizoel. Holzpellets are a new trend and people tend to use them more. Erdgas is one of mostly used and also eco-friendly. Hessen is the state which produces the most co2 emissions. Saarland, Hmaburg and Bayern are among the most eco-friendly states and have lowest numbers of co2 emissions.
+Lately temperatures tend to drop and so does the energy consumption. The cold winter of 2010 shows up in the plot as an increase in the specific consumption for that year. Regarding the fuels and the co2 emissions, MFH buildings tend to use more environmental friendly fuels, such as waerme and erdgas, but SFH houses tend to use heizoel. Holzpellets are a new trend and people tend to use them more. Erdgas is one of mostly used and also eco-friendly. Hessen is the state which produces the most co2 emissions. Saarland, Hmaburg and Bayern are among the most eco-friendly states and have lowest numbers of co2 emissions.
