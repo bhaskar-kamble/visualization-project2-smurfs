@@ -972,15 +972,27 @@ Fig. 22: Slopes of the linear trends in specific energy consumption for the 16 f
 
 # 7. CO2 emission across the 16 federal states
 
-# 7a. Percentual consumption and CO2 Emissions by Bundesland (MFH & SFH)
+In this section we analyze the CO2 emissions in each federal state of Germany.
+
+## 7a. Percentage of fuel consumption split by the fuel source in each federal state (MFH+SFH combined)
+
+First we compute and plot the proportions of energy produced by each fuel source for each year and in each federal state of Germany for MFH+SFH combined. The results are shown in the following figure as an interactive graph. Please select the state from the drop down menu.
 
 ```{r}
 get_relative_frequencies_interactive(rbind(DL_SFH, DL_MFH), 'SFH & MFH - Percentual consumption per fuel by bundesland')
 ```
+Fig. 23: Interactive graph showing proportions of energy produced by each fuel source for each year and in each federal state of Germany for MFH+SFH combined. The drop down menu on the left allows you to select the state.
+
 
 When we see these trends by bundesland we can see that in general in Macklenburg-Vorpommern people tend to use heizoel. This numbers even increase over the years
 but also, lately the strom and the holzpellets became an option to the people. We can see the same for Niedersachsen Nordrhein-Westfalen, Hamburg, Hessen.
 In other bundeslaender however, like Berlin, Saarland there's an increased number of people who use strom and the usage of heizoel drops down. This data will be better explained by the lines below.
+
+
+## 7b. CO2 Emissions for each federal state (MFH + SFH combined)
+
+With the help of the official figures for the areas in each federal state (given in the files `MFHAreas_bundeslands.csv` and `SFHAreas_bundeslands.csv` in the repo) and the specific consumption obtained from the co2online data we can calculate the total energy consumed in each bundesland in each year. With the help of the energy proportions split by `energietraeger`, found in the previous section, we can find the proportion of energy produced by each fuel type. Using the co2 coefficients then lets us estimate the co2 produced. The following graph shows the co2 produced in an interactive way, with the drop down menu allowing you to choose the federal state.
+
 
 ```{r}
 library(plotly)
@@ -988,17 +1000,27 @@ library(tidyr)
 
 get_co2_emissions_interactive(mfh_area, rbind(DL_SFH, DL_MFH), co2_coef, 'SFH & MFH - CO2 Emissions by Bundesland')
 ```
+Fig. 24: co2 emissions for MFH+SFH combined. Use the drop down menu to select the bundesland.
+
 
 We can see in the plot below that there was a period from 2009-2015 where people were using strom to heat their homes, thus there was a large co2 emission from there. First we thought that this was because the prices whent down,
 but we checked that information and it wasn't orrect. Same as before, when the erdgass prices and the heizoel have negative correlation. We can also conclude that there's drop in the heizoel consumption lately.
 
 
-# 7b. Percentual consumption and CO2 Emissions by Bundesland (MFH)
+## 7c. Percentage of fuel consumption split by the fuel source in each federal state (MFH)
+
+
 
 ```{r}
 get_relative_frequencies_interactive(DL_MFH, 'MFH - Percentual consumption per fuel by bundesland')
 ```
+Fig. 25: Percentage or energy produced by the different fuel types. Use the drop down meun to select the state.
+
+
 When we make comparison between the MFH and the SFH consumptions by year and bundesland we can see that in the MFH case especially in Hessen, Hamburg there's stil a large percentage of people who use heizoel, but and interesing state is Sachsen-Anhalt the largest percentage of consumption goes to  erdgass, there's a drop in the heizoel consumption and increase in the holzpellets
+
+## 7d. CO2 Emissions for each federal state (MFH)
+
 
 ```{r}
 library(plotly)
@@ -1009,12 +1031,14 @@ get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions b
 We can see the similar results here, especially for Hamburg, more specifically until 2014 there was a large co2 emission from waerme. Lately they tend to use heizoel. In Badem-Wuertemberg the started to use Waerme more and significanlty reduced the CO2 emissions from heizoel
 
 
-# 7c. Percentual consumption and CO2 Emissions by Bundesland (SFH)
+## 7e. Percentage of fuel consumption split by the fuel source in each federal state (SFH)
 ```{r}
 get_relative_frequencies_interactive(DL_SFH, 'SFH - Percentual consumption per fuel by bundesland')
 ```
 In the case of SFH, we can see that Baden-Wuerttemberg was the leader in heizoel consumption, This trend however tends to drop down. Also in Mecklenburg-Vorprommern people still tend to use heizoel.
 They also started using strom lately. 
+
+## 7f. CO2 Emissions for each federal state (SFH)
 
 ```{r}
 library(plotly)
@@ -1027,7 +1051,7 @@ Regarding the co2 emission, an interesing state is Sachsen-Anhalt where we can s
 
 
 
-# 7d. Eco-friendliness in 2018 
+## 7g. Eco-friendliness in 2018 
 
 
 In this subsection we can see how eco-friendly the states are now, in all Germany, for both MFH & SFH, then MFH and SFH separately. We get these numbers by a sequence of compuatations and specific co2 coefficients so that every fuel i s kind of weighted when contirbuting to the co2 emissions.
