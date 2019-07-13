@@ -1,7 +1,7 @@
 ---
-title: "Project Report"
+title: "Trends in heating energy consumption of residential buildings in Germany"
 author: "Ivana Trajanovska, Pallavi Mitra and Bhaskar Kamble"
-date: "23 Juni 2019"
+date: "12 July 2019"
 output: 
   html_document:
     code_folding: hide
@@ -528,7 +528,7 @@ which is not the case for single-family houses where the heizoel is kind of cons
 
 # 5b CO2 Emissons in all Germany
 
-In this section we find the total energy produced by the different fuel sources used for heating of residential buildings. Since the data from co2online provide us with the specific energy consumption, we can multiply these with the offical numbers for the areas of residential buildings in Germany and get an estimate for the total energy consumed in Germany. We have collected the official figures in the file `Areas_SFH_MFH.csv` in the github repo. In the previous section we found the proportions of energy produced by each fuel type. With these proportions, we can find how much energy was produced by each fuel type. Furthermore, each fuel type has a co2 coefficient associated with it, and multiplying with this coefficient yields the amount of co2 produced. We have plotted the co2 produced in the following figure as an interactive graph showing the co2 emitted in Germany by the various fuel sources and the various building types. The drop down menu on the left enables one to select the building type.
+In this section we find the total CO2 emitted in Germany by the production used for heating of residential buildings. This we do as follows. Since the data from co2online provide us with the specific energy consumption, we can multiply these with the offical numbers for the areas of residential buildings in Germany and get an estimate for the total energy consumed in Germany. We have collected the official figures in the file `Areas_SFH_MFH.csv` in the github repo. In the previous section we found the proportions of energy produced by each fuel type. With these proportions, we can find how much energy was produced by each fuel type. Furthermore, each fuel type has a co2 coefficient associated with it, and multiplying with this coefficient yields the amount of co2 produced. The co2 coefficients are given in the file `Germany_CO2_coefficients.txt` in the repo. We have plotted the co2 produced in the following figure as an interactive graph showing the co2 emitted in Germany by the various fuel sources and the various building types. The drop down menu on the left enables one to select the building type.
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 10: CO2 emissions by the different fuel types. Please use the drop down menu to choose the building type."}
 get_co2_emissions_interactive_all()
@@ -1153,28 +1153,46 @@ From all three plots we can conclude that Hessen is the worst bundesland in term
 
 # 8. SOM interpretations of the data
 
-In this section we're goint to take a look in other parameters that contribute to the energy consumption in all german districts. We're taking into account latitude, longitude, gebaeude_baujahr, and, gebaeude_nutzfleche
 
-## 8a SOM interpretations of MFH
-
-For the SOM analysis we use the following variables: 
+To get a better understanding of the data in terms of geographical location as well we carry out a SOM analysis in this section. Among the variables we shall be using are the `gebaeude_baujahr` (year of construction), `gebaeude_nutzflaeche` (area of the building), `verbrauch_gesamt_kWh_spez` (specific consumption), the latitude and the longitude of the federal district in which the building is situated. The latter two are extracted from the `Landkreis_von_GS` (i.e. the federal district) column in the data, coupled with the centroids of the Landkreis in the shape file of Germany. The relevant shapefile in this regard is `shapefiles/gadm36_DEU_shp/gadm36_DEU_2.shp`. The result of the SOM for MFH buildings is shown below.
 
 ```{r}
 library(plotly)
 library(tidyr)
 plot_som(DL_MFH)
 ```
+
 Fig. 32: SOM for MFH buildings.
 
-## 8b SOM interpretations of SFH
+
+
+The following figure shows the results of the SOM analysis for SFH buildings.
+
 ```{r}
 library(plotly)
 library(tidyr)
 plot_som(DL_SFH)
 ```
+
 Fig. 33: SOM for SFH buildings.
 
+The results of the SOM analysis can be summarized as follows:
+
+* A lot of the districts that are far north have higher consumption.
+* Middle eastern districts also had larger consumption.
+* Some districts far north have lower consumption.
+* Districts belonging to Baden-Wuertemberg had newer buildings and lower consumption.
 
 # 9. Conclusions
 
-Lately temperatures tend to drop and so does the energy consumption. The cold winter of 2010 shows up in the plot as an increase in the specific consumption for that year. Regarding the fuels and the co2 emissions, MFH buildings tend to use more environmental friendly fuels, such as waerme and erdgas, but SFH houses tend to use heizoel. Holzpellets are a new trend and people tend to use them more. Erdgas is one of mostly used and also eco-friendly. Hessen is the state which produces the most co2 emissions. Saarland, Hmaburg and Bayern are among the most eco-friendly states and have lowest numbers of co2 emissions.
+In this report we investigated the heating energy consumption in Germany using the data of [co2online.de](www.co2online.de) in the period 2002-2018. We found that the energy consumption if SFH buildings is perceptibly higher than in MFH buildings. We ascribe the higher efficiency of multifamily buildings to the possible  reason that multifamily buildings are located in the city where there is higher traffic, more density of buildings and higher pollution which leads to a warming up, and consequently less energy consumption. The heating of one flat in such a building also contributes to the heating of other flats, leading to less energy wastage. Also the larger of these buildings make them retain heat for a longer period in contrast to single and double family buildings. On the other hand, 1-2 family buildings are often located in the countryside, with almost no pollution, and with lesser number of people in the region. This leads to increased energy consumption.
+
+We also found that the specific energy consumption for both SFH anf MFH buildings are decreasing over the years. Even though the SFH buildings consume more energy than MFH buildings, their rate of decreasing is more than that of MFH buildings, suggesting that their efficiency is catching up with MFH buildings. We also found interesting patterns with respect to the temperature. In particular, the data show a high consumption for 2010, and this corresponds to the especially cold winter of that year.
+
+We also considered the reasons for the decrease in specific consumption over the years. Among the most likely reasons are the fact that recently constructed buildings have to adhere to stricter government norms, making them more energy efficient. The other reason is that refurbishment measures are carried out in buildings that are older, thus increasing their efficiency. A third reason is the increasing temperature over the years, which leads to a lower energy consumption. In order to understand to what extent the first two reasons play a role and to what extent increasing temperature plays a role in reducing energy consumption, we carried out a regression analysis with respect to temperature and year and found that increasing temperature is not the sole reason for the decrease in energy consumption, and the other two reasons also play animportant role.
+
+We also carried out similar analyses for the 16 federal states in Germany. We found that the rate of decrease is the fastest for Schleswig-Holstein for MFH buildings, and for Hamburg for 1-2 family buildings.
+
+
+
+Regarding the fuels and the co2 emissions, MFH buildings tend to use more environmental friendly fuels, such as waerme and erdgas, but SFH houses tend to use heizoel. Holzpellets are a new trend and people tend to use them more. Erdgas is one of mostly used and also eco-friendly. Hessen is the state which produces the most co2 emissions. Saarland, Hmaburg and Bayern are among the most eco-friendly states and have lowest numbers of co2 emissions.
