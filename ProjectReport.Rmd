@@ -508,11 +508,11 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 
 ```
 
-# 5a Energy consumption per fuel
+# 5a Proportions of energy produced by each fuel type
 
-In this section we find the total energy produced by the different fuel sources used for heating of residential buildings. Since the data from co2online provide us with the specific energy consumption, we can multiply these with the offical numbers for the areas of residential buildings in Germany. The following figure is an interactive graph showing the proportions of energy produced by the different fuels for multifamily, 1-2 family, and both combined building types. The building type can be chosen from the drop down on the left.
+ in the the following interactive graph showing the proportions of energy produced by the different fuels for multifamily, 1-2 family, and both combined building types. The building type can be chosen from the drop down on the left.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 8: Proportions of energy produced by the different fuels. Please use the drop down menu to choose the building type."}
+```{r,fig.cap="\\label{fig:figs}Fig. 9: Proportions of energy produced by the different fuels. Please use the drop down menu to choose the building type."}
 get_relative_frequencies_interactive_all()
 ```
 First let's point out that the heizoel is the most non eco-freindly fuel.
@@ -526,13 +526,13 @@ which is not the case for single-family houses where the heizoel is kind of cons
 
 # 5b CO2 Emissons in all Germany
 
-The following figure is an interactive graph showing the co2 emitted in Germany by the various fuel sources. The drop down menu on the left enables one to select the building type.
+In this section we find the total energy produced by the different fuel sources used for heating of residential buildings. Since the data from co2online provide us with the specific energy consumption, we can multiply these with the offical numbers for the areas of residential buildings in Germany and get an estimate for the total energy consumed in Germany. We have collected the official figures in the file `Areas_SFH_MFH.csv` in the github repo. In the previous section we found the proportions of energy produced by each fuel type. With these proportions, we can find how much energy was produced by each fuel type. Furthermore, each fuel type has a co2 coefficient associated with it, and multiplying with this coefficient yields the amount of co2 produced. We have plotted the co2 produced in the following figure as an interactive graph showing the co2 emitted in Germany by the various fuel sources and the various building types. The drop down menu on the left enables one to select the building type.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 9: CO2 emissions by the different fuel types. Please use the drop down menu to choose the building type."}
+```{r,fig.cap="\\label{fig:figs}Fig. 10: CO2 emissions by the different fuel types. Please use the drop down menu to choose the building type."}
 get_co2_emissions_interactive_all()
 ```
-When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany,
-except that the co2 emissions from the heizoel and erdgass change slightly in every, we could even say that there's a negative correlation between them.
+
+When we see how the usage of these fuels effects the co2 emissions, in general we can say that that there are not a lot of changes all over Germany, except that the co2 emissions from the heizoel and erdgass change slightly in every, we could even say that there's a negative correlation between them.
 
 For the MFH case we can see that the heizoel co2 emission starts to decrease over the years, and the co2 emission that come from the erdgass starts to increase.
 There's a strong negative correlation between them. On the other hand when we take a look at the SFH we can see that the co2 emissions from the heizoel are the highest
@@ -644,7 +644,7 @@ p <- p %>% layout(showlegend=FALSE,
 )
 ```
 
-```{r,fig.cap="\\label{fig:figs}Fig. 7: Interactive plot for the specific energy consumption for the 16 federal states for multifamily houses from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 11: Interactive plot for the specific energy consumption for the 16 federal states for multifamily houses from 2002-2018."}
 p
 ```
 
@@ -652,7 +652,7 @@ p
 We can collect the data from all the states and years into a single heat map as follows:
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 8: Heat map of the specific energy consumption for the year and the state for multifamily houses."}
+```{r,fig.cap="\\label{fig:figs}Fig. 12: Heat map of the specific energy consumption for the year and the state for multifamily houses."}
 library(plotly)
 
 tmp <- aggregate(DL_MFH[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')][c(-1, -2)], by=list(DL_MFH$bundesland, DL_MFH$abrechnungsjahr), FUN = mean)
@@ -669,7 +669,7 @@ p
 
 The heat map above shows that Schleswig-Hosltein has quite high energy consumption comapred to the other states in the beginning, which can also be verified from the interactive plot in Fig. 5. For a comparison of how fast the specific energy consumption is falling, we have plotted the bar plots of the absolute values of the slopes of the linear trends in the next graph.
 
-```{r,fig.cap="\\label{fig:figs}Fig. 9: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany"}
+```{r,fig.cap="\\label{fig:figs}Fig. 13: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany"}
 abrechnungsjahr = 2002:2018
 lm1 <- lm(as.matrix(bundSV_mfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_mfh_df[states[2]]) ~ abrechnungsjahr)
@@ -701,7 +701,7 @@ p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 We have presented the same data as above in an interactive map of the 16 federal states in the next figure. Please click on the respective state to see its name and the slope value in kWh/Year.
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 10: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
+```{r,fig.cap="\\label{fig:figs}Fig. 14: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
 slopes_data <- data.frame(bundesland=states)
 slope_values_mfh <- NULL
 slope_values_sfh <- NULL
@@ -761,7 +761,7 @@ tm_shape(DL_map) + tm_polygons("MFH",
 The next plot shows the specific energy consumption for the 16 federal states for 1-2 family houses in Germany from 2002-2018 as an interactive plot. The specific federal state can be selected from the drop-down menu and the plot corresponding to that state is exhibited.
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 11:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 15:  Interactive plot for the specific energy consumption for the 16 federal states for 1-2 family houses from 2002-2018."}
 p <- plot_ly(bundSV_sfh_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
@@ -798,7 +798,7 @@ p
 
 The same information can be put into a single heat map:
 
-```{r,fig.cap="\\label{fig:figs}Fig. 12:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
+```{r,fig.cap="\\label{fig:figs}Fig. 16:  Heat map of the specific energy consumption for the year and the state for 1-2 family houses."}
 
 library(plotly)
 
@@ -815,7 +815,7 @@ p
 
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 13:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
+```{r,fig.cap="\\label{fig:figs}Fig. 17:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_sfh_df[states[2]]) ~ abrechnungsjahr)
 lm3 <- lm(as.matrix(bundSV_sfh_df[states[3]]) ~ abrechnungsjahr)
