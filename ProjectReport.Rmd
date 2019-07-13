@@ -80,7 +80,7 @@ temp_winter <- read.delim("GermanyWinterTemperatures.txt", header = FALSE, sep =
 str(DL_MFH)
 ```
 
-Thus we see that there are `r nrow(DL_MFH)` observations for multifamily houses. The `?nergietraeger` is the source of fuel used for heating the building. The other variables of interest are the year of construction `gebaeude_baujahr`, the year in which the energy was measured (`abrechnungsjahr`), and the area of the building (`genaeude_nutzflaeche`).
+Thus we see that there are `r nrow(DL_MFH)` observations for multifamily houses. The `energietraeger` is the source of fuel used for heating the building. The other variables of interest are the year of construction `gebaeude_baujahr`, the year in which the energy was measured (`abrechnungsjahr`), and the area of the building (`genaeude_nutzflaeche`).
 
 ```{r}
 str(DL_SFH)
@@ -91,8 +91,6 @@ For 1-2 family houses there are `r nrow(DL_SFH)` observations.
 # 4. Energy consumption trends across Germany
 
 In this section we will analyze how the specific energy consumption (energy consumed per unit area) across Germany changes over the years.
-
-The various features involved (`energietraeger`, etc.). MFH is multifamily houses and 1-2FH is 1-2 family houses.
 
 
 ## 4a. Specific Energy Consumtion trends
@@ -132,7 +130,7 @@ ggplot(data=germany_winter_temp,aes(x=Year,y=Temperature))+geom_point()+geom_smo
 
 The plot shows an overall increase when one considers the linear trend, and hence has definitely contributed to the decrease in energy consumption. To what extent the decrease in energy consumption is caused by the aforementioned three factors is an interesting question which needs further investigation. One possible solution is to do a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably). This we do shortly.
 
-In Fig. 1, there is a sharp increase in energy consumption for the year 2010. This corresponds to the extremely cold winter of the year 2010, as seen in Fig. 2, or in Fig. 3.
+In Fig. 1, there is a sharp increase in energy consumption for the year 2010. This corresponds to the extremely cold winter of the year 2010, as seen in Fig. 2, or in Fig. 3, which shows the annual mean of the temperature.
 
 
 ![Fig. 3: Temperatures in Germany from 1881 - 2018. Source: wikipedia](1000px-Zeitreihe_der_Temperaturen_in_Deutschland.svg.png)
@@ -154,6 +152,8 @@ slopedata <- data.frame(gtype=c("MFH","SFH","Both"),slope=abs(c(bmfh[2],bsfh[2],
 ggplot(data=slopedata,aes(x=gtype,y=slope))+geom_bar(stat="identity",width=0.5) + geom_errorbar(aes(ymin=slope_low,ymax=slope_high),width=0.2) + coord_flip() + labs(title="Rate of change of specific energy consumption in Germany (2002 - 2018)",x="Building type")+theme_bw()
 ```
 
+
+Instead of treating the MFH and SFH buildings separately, we can model them together using `abrechnungsjahr` as a continuous variable and the building type as a categorical variable. We do this in the following figure.
 
 ```{r}
 # Combining MFH and SFH data and adding gtype column
@@ -195,6 +195,8 @@ ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype)
 ```
 
 
+As expected, the values for the specific consumption by SFH buildings are higher than those for the MFH buildings.
+
 
 Adding interaction terms to a regression model can greatly expand understanding of the relationships among the variables in the model and allows more hypotheses to be tested.  The presence of a significant interaction indicates that the effect of one predictor variable on the response variable is different at different values of the other predictor variable. It would be useful to add an interaction term to the model if we wanted to test the hypothesis that the relationship between the abrechnungsjahr on the spz_verbrauch was different in buiding type i.e. mfh and sfh. The next figure shows the result of adding such an interaction term in the model.
 
@@ -216,7 +218,7 @@ ggplot(MFH_SFH_spez_verbrauch,aes(y=spz_verbrauch,x=abrechnungsjahr,color=gtype)
         stat_function(fun=equation2,geom="line",color=scales::hue_pal()(2)[2])+labs(title="MFH & SFH")+scale_x_continuous(name="Year", breaks =seq(2002, 2018, 2))+scale_y_continuous(limits=c(0,150))+labs(x="Year", y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
-When we use interaction between the year and the building type it explains the data better. We next use a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably).
+We next use a linear regression of the specific consumption as a function of temperature as a continuous variable and abrechnungsjahr as a categorical variable (after binning it suitably).
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 7: Specific consumption as a function of temperature grouped by the year categories for multifamily buildings. The linear trends with temperature as continuous variable and year (binned) as categorical variable."}
 # effect of temperature on MFH
@@ -813,7 +815,9 @@ p <- plot_ly(
 p
 ```
 
+The above graph shows that Hamburg had especially high energy consumption per unit area in the inital years, but this went down in later years.
 
+We next plot the absolute values of the slopes of the linear trend for the specific consumption in the following graph for each of the federal state for SFH buildings. Hamburg has the fastest descent in the specific consumption for 1-2 family buildings.
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 17:   Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_sfh_df[states[1]]) ~ abrechnungsjahr)
@@ -844,6 +848,9 @@ p +labs(title="SFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 ```
 
 
+In the next picture, we plot a map of the states of Germany colored by the slope value of that particular state for SFH buildings. We see that Hamburg has an unusually high slope, which dominates over all the other states.
+
+
 ```{r}
 DL_map$SFH <- slopes_data$SFH #merge or inner_join gives error
 tmap_mode("view")
@@ -862,9 +869,9 @@ Fig. 18: Slopes of the linear trends in specific energy consumption for the 16 f
 
 ## 6d. Specific Energy Consumption for Multi and 1-2 Family Houses combined for the federal states
 
+Here we look at the overall behavior of SFH+MFH buildings combined. The following is an interactive graph showing the specific energy consumption with the federal state being chosen by the drop down menu.
 
-
-```{r,fig.cap="\\label{fig:figs}Fig. 19: Interactive plot for the specific energy consumption for the 16 federal states for both (MFH+SFH combined) type of buildings from 2002-2018."}
+```{r,fig.cap="\\label{fig:figs}Fig. 19: Interactive plot for the specific energy consumption for the 16 federal states for both (MFH+SFH combined) type of buildings from 2002-2018. Use the drop down menu to select the federal state."}
 p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
@@ -898,6 +905,8 @@ p <- p %>% layout(showlegend=FALSE,
 p
 ```
 
+The next plot shows a heat map of the specific consumption plotted against the year and the federal state.
+
 ```{r,fig.cap="\\label{fig:figs}Fig. 20: Heat map of the specific energy consumption for the year and the state for MFH+SFH family houses."}
 library(plotly)
 
@@ -914,6 +923,7 @@ p <- plot_ly(
 p
 ```
 
+The next plot shows the absolute value of the slopes of each federal state.
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 21: Slopes of the linear trends in specific energy consumption for the 16 federal states for MFH+SFH houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
@@ -942,6 +952,10 @@ p <-ggplot(mydata, aes(states, slope)) + geom_bar(stat = "identity")+ coord_flip
 p +labs(title="ALL",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 ```
 
+We see that Schleswig-Holstein and Hamburg are at positions 2 and 3, respectively, while Bremen goes to the top spot. 
+
+
+In the next picture, we plot a map of the states of Germany colored by the slope value of that particular state for MFH+SFH buildings which corroborates the above statement.
 
 
 ```{r}
@@ -1009,18 +1023,19 @@ but we checked that information and it wasn't orrect. Same as before, when the e
 
 ## 7c. Percentage of fuel consumption split by the fuel source in each federal state (MFH)
 
-
+Below we plot the proprotion of energy produced by each fuel type for MFH buildings as an interactive plot. The state can be selected from the drop down menu.
 
 ```{r}
 get_relative_frequencies_interactive(DL_MFH, 'MFH - Percentual consumption per fuel by bundesland')
 ```
-Fig. 25: Percentage or energy produced by the different fuel types. Use the drop down meun to select the state.
+Fig. 25: Percentage or energy produced by the different fuel types for MFH buildings. Use the drop down meun to select the state.
 
 
 When we make comparison between the MFH and the SFH consumptions by year and bundesland we can see that in the MFH case especially in Hessen, Hamburg there's stil a large percentage of people who use heizoel, but and interesing state is Sachsen-Anhalt the largest percentage of consumption goes to  erdgass, there's a drop in the heizoel consumption and increase in the holzpellets
 
 ## 7d. CO2 Emissions for each federal state (MFH)
 
+The following graph shows the co2 emissions for each fuel type and each federal state in an interactive graph for MFH buildings. The state can be selected by the drop down menu.
 
 ```{r}
 library(plotly)
@@ -1028,17 +1043,28 @@ library(tidyr)
 
 get_co2_emissions_interactive(mfh_area, DL_MFH, co2_coef, 'MFH - Co2 Emissions by Bundesland (Megatonnes)')
 ```
+Fig. 26: CO2 emissions for MFH buildings in each federal state. Select the federal state from teh drop down menu.
+
 We can see the similar results here, especially for Hamburg, more specifically until 2014 there was a large co2 emission from waerme. Lately they tend to use heizoel. In Badem-Wuertemberg the started to use Waerme more and significanlty reduced the CO2 emissions from heizoel
 
 
 ## 7e. Percentage of fuel consumption split by the fuel source in each federal state (SFH)
+
+Below we plot the proprotion of energy produced by each fuel type for SFH buildings as an interactive plot. The state can be selected from the drop down menu.
+
+
 ```{r}
 get_relative_frequencies_interactive(DL_SFH, 'SFH - Percentual consumption per fuel by bundesland')
 ```
+Fig. 27: Percentage or energy produced by the different fuel types for SFH buildings. Use the drop down menu to select the state.
+
+
 In the case of SFH, we can see that Baden-Wuerttemberg was the leader in heizoel consumption, This trend however tends to drop down. Also in Mecklenburg-Vorprommern people still tend to use heizoel.
 They also started using strom lately. 
 
 ## 7f. CO2 Emissions for each federal state (SFH)
+
+The following graph shows the co2 emissions for each fuel type and each federal state in an interactive graph for SFH buildings. The state can be selected by the drop down menu.
 
 ```{r}
 library(plotly)
@@ -1046,6 +1072,9 @@ library(tidyr)
 
 get_co2_emissions_interactive(mfh_area, DL_SFH, co2_coef, 'SFH - Co2 Emissions by Bundesland  (Megatonnes)')
 ```
+Fig. 28: CO2 emissions for SFH buildings in each federal state. Select the federal state from teh drop down menu.
+
+
 Regarding the co2 emission, an interesing state is Sachsen-Anhalt where we can see that they don't use heizoel and erdgass lately, but they tend to use strom.
 
 
