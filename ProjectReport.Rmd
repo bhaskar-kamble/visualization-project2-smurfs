@@ -126,7 +126,7 @@ From the above picture we can infer that the specific energy consumption for 1-2
 ```{r,fig.cap="\\label{fig:figs}Fig. 2: Winter temperatures in Germany from 2002-2018 (source: https://de.wikipedia.org/wiki/Zeitreihe_der_Lufttemperatur_in_Deutschland#2001_bis_2010)"}
 germany_winter_temp <- read.table(paste0(path_to_file,"GermanyWinterTemperatures.txt"))
 names(germany_winter_temp) <- c("Year","Temperature")
-ggplot(data=germany_winter_temp,aes(x=Year,y=Temperature))+geom_point()+geom_smooth(method="lm",se=FALSE)
+ggplot(data=germany_winter_temp,aes(x=Year,y=Temperature))+geom_point()+geom_smooth(method="lm",se=FALSE)+labs(y="Temperature (degrees Celsius)")
 ```
 
 
@@ -272,7 +272,7 @@ ggplot(SFH_spez_verbrauch,aes(y=spz_verbrauch,x=temp,color=as.factor(yearbin)))+
         labs(title="EFFECT OF TEMPERTURE IN SFH")+scale_x_continuous(name="temp", limits=c(-2,5))+scale_y_continuous(limits=c(0,150))+labs(x="Temperature (degrees Celsius)"  , y=bquote("Specific Consumption" ~ (kWh/m^2)) )
 ```
 
-
+The above graph also shows also that specific energy consumption in later years is lesser than that in earlier years for a given temperature. In addition, we have the somewhat surprising result that the temperature seems to play hardly any role in the specific consumption. 
 
 
 # 5. CO2 emissions across Germany
@@ -510,7 +510,7 @@ get_co2_emissions_interactive <- function(data, energy_consumption_data, co2_coe
 
 # 5a Proportions of energy produced by each fuel type
 
- in the the following interactive graph showing the proportions of energy produced by the different fuels for multifamily, 1-2 family, and both combined building types. The building type can be chosen from the drop down on the left.
+The following interactive graph shows the proportions of energy produced by the different fuels for multifamily, 1-2 family, and both combined building types. The building type can be chosen from the drop down on the left.
 
 ```{r,fig.cap="\\label{fig:figs}Fig. 9: Proportions of energy produced by the different fuels. Please use the drop down menu to choose the building type."}
 get_relative_frequencies_interactive_all()
@@ -701,7 +701,7 @@ p +labs(title="MFH",x="",y=bquote("kWh/(Year"~ m^2 ~ ")"))
 We have presented the same data as above in an interactive map of the 16 federal states in the next figure. Please click on the respective state to see its name and the slope value in kWh/Year.
 
 
-```{r,fig.cap="\\label{fig:figs}Fig. 14: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year."}
+```{r}
 slopes_data <- data.frame(bundesland=states)
 slope_values_mfh <- NULL
 slope_values_sfh <- NULL
@@ -739,7 +739,7 @@ tm_shape(DL_map) + tm_polygons("MFH",
                                #legend.reverse=TRUE - Gives WRONG info!
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
-
+Fig. 14: Slopes of the linear trends in specific energy consumption for the 16 federal states for multifamily houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year.
 
 
 
@@ -856,6 +856,7 @@ tm_shape(DL_map) + tm_polygons("SFH",
                                #legend.reverse=TRUE - Gives WRONG info!
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
+Fig. 18: Slopes of the linear trends in specific energy consumption for the 16 federal states for 1-2 family houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year.
 
 
 
@@ -863,7 +864,7 @@ tm_shape(DL_map) + tm_polygons("SFH",
 
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 19: Interactive plot for the specific energy consumption for the 16 federal states for both (MFH+SFH combined) type of buildings from 2002-2018."}
 p <- plot_ly(bundSV_all_df , x = ~abrechnungsjahr) %>%
   add_markers(y = ~get(states[1]), name = " ",marker=list(color="black")) %>%
   add_markers(y = ~get(states[2]), name = " " , marker=list(color="black"), visible = F) %>%
@@ -897,7 +898,7 @@ p <- p %>% layout(showlegend=FALSE,
 p
 ```
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 20: Heat map of the specific energy consumption for the year and the state for MFH+SFH family houses."}
 library(plotly)
 
 bind <- rbind(DL_MFH,DL_SFH)[,c('bundesland','abrechnungsjahr','verbrauch_gesamt_kwh_spez')]
@@ -914,7 +915,7 @@ p
 ```
 
 
-```{r}
+```{r,fig.cap="\\label{fig:figs}Fig. 21: Slopes of the linear trends in specific energy consumption for the 16 federal states for MFH+SFH houses in Germany"}
 lm1 <- lm(as.matrix(bundSV_all_df[states[1]]) ~ abrechnungsjahr)
 lm2 <- lm(as.matrix(bundSV_all_df[states[2]]) ~ abrechnungsjahr)
 lm3 <- lm(as.matrix(bundSV_all_df[states[3]]) ~ abrechnungsjahr)
@@ -955,6 +956,7 @@ tm_shape(DL_map) + tm_polygons("ALL",
                                #legend.reverse=TRUE - Gives WRONG info!
 )+tm_layout(aes.palette=list(seq="-RdYlGn"))
 ```
+Fig. 22: Slopes of the linear trends in specific energy consumption for the 16 federal states for MFH+SFH family houses in Germany shown as an interactive map. Please click on the respective state to see the state name and the slope value in kWh/Year.
 
 
 
